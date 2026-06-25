@@ -1,18 +1,17 @@
 const express = require('express')
 const router = express.Router()
-const { getProjects, getProject, updateProject, addProject, deleteProject } = require('../controller/projectController')
-const projectValidation = require('../middleware/projectValidation')
+const { getProjects, getProject, updateProject, addProject, deleteProject, inviteAndAssign } = require('../controller/projectController')
+const idValidation = require('../middleware/idValidation')
+const taskRouter = require('../router/taskRouter')
 
-router.get("/:id", projectValidation, getProject)
-router.put("/:id", projectValidation, updateProject)
-router.delete("/:id", projectValidation, deleteProject)
+router.use("/:id/tasks", taskRouter)
+
+router.get("/", getProjects)
+router.get("/:id", idValidation, getProject)
+router.put("/:id", idValidation, updateProject)
+router.delete("/:id", idValidation, deleteProject)
 router.post("/", addProject)
 
-// router.get("/:id/tasks", getTasks)
-// router.delete("/:id/tasks", getTasks)
-// router.get("/:id/tasks", getTasks)
-// router.get("/:id/tasks", getTasks)
-
-// router.get("/:id/members", getMembers)
+router.post("/:id/memebers", inviteAndAssign)
 
 module.exports=router

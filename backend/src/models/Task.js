@@ -11,7 +11,7 @@ const TaskSchema = new mongoose.Schema({
     },
     project_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: Project,
+        ref: "Project",
         required: [true, "task must belong to a project"]
     }
 }, {

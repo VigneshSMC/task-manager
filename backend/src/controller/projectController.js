@@ -7,21 +7,18 @@ exports.getProjects = async (req, res) => {
         res.status(200).json({ message: "Projects retrieved successfuly", body: projects })
     }
     catch(error) {
-        res.status(400).json({error})
+        res.status(400).json({error: error.message})
     }
 }
 exports.getProject = async (req, res) => {
     try {
         const id = req.params.id
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({ error: "Invalid Project ID format" });
-        }
         const project = await Project.findOne({_id: id})
         if (!project) return res.status(404).json({error: " project id not available"})
         res.status(200).json({project})
     }
     catch(error) {
-        res.status(400).json({error})
+        res.status(400).json({error: error.message})
     }
 }
 exports.addProject = async (req, res) => {
@@ -34,7 +31,7 @@ exports.addProject = async (req, res) => {
         res.status(201).json({project})
     }
     catch(error) {
-        res.status(400).json({error})
+        res.status(400).json({error: error.message})
     }
 }
 exports.updateProject = async (req, res) => {
@@ -46,10 +43,22 @@ exports.updateProject = async (req, res) => {
         res.status(200).json({message: "updated successfully", data: updatedProject})
     }
     catch(error) {
-        res.status(400).json({error})
+        res.status(400).json({error: error.message})
     }
 } 
 
-exports.deleteProject = (req, res) => {
+exports.deleteProject = async (req, res) => {
+    try {
+        const id = req.params.id
+        const project = await Project.findByIdAndDelete(id)
+        if (!project) return res.status(404).json({message: "project not found"})
+        res.status(200).json({message: "deletion successful", data: project})
+    }
+    catch(error) {
+        res.status(400).json({error: error.message})
+    }
+}
 
+exports.inviteAndAssign = async (req, res) => {
+    
 }
