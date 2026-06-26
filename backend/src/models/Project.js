@@ -9,10 +9,10 @@ const ProjectSchema = new mongoose.Schema({
         type: String,
         required: [true, "description is required"]
     },
-    members: {
+    members: [{
         type: mongoose.Types.ObjectId,
         ref: "User"
-    }
+    }]
 }, {
     timestamps: true
 })

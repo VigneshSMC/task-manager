@@ -3,7 +3,10 @@ const mongoose = require('mongoose')
 
 exports.getProjects = async (req, res) => {
     try {
-        const projects = await Project.find()
+        const { role, id } = req.user
+        console.log(role)
+        const roleFilter = role === 'admin' ? {} : {members: id}
+        const projects = await Project.find(roleFilter).populate("members")
         res.status(200).json({ message: "Projects retrieved successfuly", body: projects })
     }
     catch(error) {

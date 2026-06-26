@@ -5,6 +5,7 @@ import { addTaskAPI, deleteTaskAPI } from "../services/taskService"
 import { useDispatch } from "react-redux"
 import { deleteTask } from "../slice/TaskSlice"
 import { store } from '../store/store'
+import Members from "./Members"
 
 export default function Tasks() {
 
@@ -13,31 +14,32 @@ export default function Tasks() {
     console.log(tasks)
 
     return (
-        <>
-        <h1>TASKS</h1>
-        <section className="tasks">
-            <ul>
-                {tasks.map((d, i) => {
-                    return (<li key={i}>
-                        <div className="taskitem">
-                            <h3>{d.title}</h3>
-                            <p>{d.description}</p>
-                        </div>
-                        <h4 onClick={() => {
-                            deleteTaskAPI(d.project_id, d._id)
-                            dispatch(deleteTask(d._id))
-                        }}>DEL</h4>
-                    </li>
-                    )
-                })}
-            </ul>
-            <Form method="post">
-                <input name="title" type="text" placeholder="title" />
-                <input name="description" type="text" placeholder="description" />
-                <button>ADD</button>
-            </Form>
-        </section>
-        </>
+        <main className="spec">
+            <section className="tasks">
+                <h1>TASKS</h1>
+                <ul>
+                    {tasks.map((d, i) => {
+                        return (<li key={i}>
+                            <div className="taskitem">
+                                <h3>{d.title}</h3>
+                                <p>{d.description}</p>
+                            </div>
+                            <h4 onClick={() => {
+                                deleteTaskAPI(d.project_id, d._id)
+                                dispatch(deleteTask(d._id))
+                            }}>DEL</h4>
+                        </li>
+                        )
+                    })}
+                </ul>
+                <Form method="post">
+                    <input name="title" type="text" placeholder="title" />
+                    <input name="description" type="text" placeholder="description" />
+                    <button>ADD</button>
+                </Form>
+            </section>
+            <Members />
+        </main>
     )
 }
 
