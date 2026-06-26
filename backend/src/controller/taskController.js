@@ -3,7 +3,8 @@ const mongoose = require('mongoose')
 
 exports.getTasks = async (req, res) => {
     try {
-        const tasks = await Task.find()
+        const id = req.params.id
+        const tasks = await Task.find({project_id: id})
         res.status(200).json({ message: "Tasks retrieved successfuly", body: tasks })
     }
     catch(error) {

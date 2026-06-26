@@ -1,19 +1,22 @@
 const User = require('../models/User')
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
 exports.registerUser = async (req, res) => {
     try {
         const { email, name, password } = req.body
         const exists = await User.findOne({ email })
-        if (exists) res.json({ message: "user already exists" })
+        if (exists) res.status(409).json({ error: "user already exists" })
         const hashedPassword = await bcrypt.hash(password, 10)
         const newUser = await User.create({
             email, name, password: hashedPassword
         })
-        res.json({ message: "registered successfully", user: {name: newUser.name, email: newUser.email} })
+        const token = generateToken(newUser._id)
+        res.json({ message: "registered successfully", user: 
+            {name: newUser.name, email: newUser.email, token} })
     }
     catch (error) {
-        res.status(500).json({error})
+        res.status(404).json({error: error.message})
     }
 }
 
@@ -21,12 +24,18 @@ exports.userLogin = async (req, res) => {
     try {
         const { email, password } = req.body
         const exists = await User.findOne({email})
-        if (!exists) return res.status(400).json({message: "user does not exist"})
+        if (!exists) return res.status(404).json({error: "user does not exist"})
         const unhashed = await bcrypt.compare(password, exists.password)
-        if (unhashed) return res.status(200).json({message: "login successful", user: { name: exists.name, email: exists.email }})
+        const token = generateToken(exists._id)
+        if (unhashed) return res.status(200).json({message: "login successful", user: 
+            { name: exists.name, email: exists.email, token }})
+        throw { message : "enter valid credentials"};
     }
     catch(error) {
-        res.status(500).json({error})
+        res.status(401).json({error : error.message})
     }
-    res.json({ message: "login successful" })
+}
+
+const generateToken = (id) => {
+    return jwt.sign({id}, process.env.JWT_SECRET, {expiresIn: "1h"})
 }

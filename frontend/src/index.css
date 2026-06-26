@@ -1,0 +1,261 @@
+body {
+  margin: 0;
+}
+
+#root {
+  width: 1126px;
+  max-width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  border-inline: 1px solid var(--border);
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+.dashboard {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.projects {
+  background-color: rgba(42, 154, 154, 0.659);
+  border-radius: 20px;
+  min-height: fit-content;
+  margin: 20px;
+  padding: 25px;
+}
+
+.projects ul {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: column;
+  width: 390px;
+}
+
+.projects h3, p {
+  margin: 0;
+}
+
+.projects li {
+  background-color: white;
+  border-radius: 10px;
+  margin: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 30px;
+  padding: 20px;
+  width: 80%;
+}
+
+.projects div {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.projects h4 {
+  cursor: pointer;
+}
+
+.projects form {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 5px;
+}
+
+.projects form input {
+  margin: 5px 0 2px 0;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  padding-left: 10px;
+  width: 80%;
+  height: 5vh;
+}
+
+.projects form button {
+  color: white;
+  background-color: black;
+  margin: 10px;
+  cursor: pointer;
+  border-radius: 3px;
+  border: none;
+}
+
+.projectitem {
+  cursor: pointer;
+}
+
+.task {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.task section {
+  background-color: rgba(0, 255, 255, 0.667);
+  border-radius: 20px;
+  width: 90%;
+  height: 60vh;
+}
+
+.login {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.login section {
+  border-radius: 20px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login section form {
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+  display: flex;
+  justify-content: center;
+  align-items: space-between;
+  flex-direction: column;
+  background-color: white;
+  min-height: fit-content;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.login section form div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  margin: 5px;
+}
+
+.login section form input {
+  border-radius: 10px;
+  border-width: 1px;
+  outline: 1px;
+  padding: 10px;
+  margin-left: 10px;
+}
+
+.login section form button {
+  background-color: white;
+  cursor: pointer;
+  border-width: 1px;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+.login .error {
+  background-color: rgba(251, 244, 244, 0.834);
+  min-width: 70%;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  border-radius: 10px;
+  height: 75px;
+  position: absolute;
+}
+
+.login .error .close {
+  cursor: pointer;
+}
+
+.tasks {
+  background-color: rgba(42, 154, 154, 0.659);
+  border-radius: 20px;
+  min-height: fit-content;
+  margin: 20px;
+  padding: 25px;
+}
+
+.tasks ul {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: column;
+  width: 390px;
+}
+
+.tasks h3, p {
+  margin: 0;
+}
+
+.tasks li {
+  background-color: white;
+  border-radius: 10px;
+  margin: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 30px;
+  padding: 20px;
+  width: 80%;
+}
+
+.tasks div {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.tasks h4 {
+  cursor: pointer;
+}
+
+.tasks form {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 5px;
+}
+
+.tasks form input {
+  margin: 5px 0 2px 0;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  padding-left: 10px;
+  width: 80%;
+  height: 5vh;
+}
+
+.tasks form button {
+  color: white;
+  background-color: black;
+  margin: 10px;
+  cursor: pointer;
+  border-radius: 3px;
+  border: none;
+}
+
+.taskitem {
+  cursor: pointer;
+}
