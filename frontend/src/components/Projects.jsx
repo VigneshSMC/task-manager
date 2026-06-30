@@ -18,33 +18,40 @@ const Projects = () => {
         navigate(`/dashboard/projects/${id}/tasks`)
     }
 
+    const [add, setAdd] = useState()
+
     return (
-        <section className="projects">
-            <ul>
-                {data.map((d, i) => {
-                    return (<li key={i}>
-                        <div className="projectitem" onClick={() => projectRedirect(d._id)}>
-                            <h3>{d.name}</h3>
-                            <p>{d.description}</p>
-                        </div>
-                        <h4 onClick={() => {
-                            deleteProjectAPI(d._id)
-                            dispatch(deleteProject(d._id))
-                        }}>DEL</h4>
-                    </li>
-                    )
-                })}
-            </ul>
-            <Form method="post">
-                <input name="name" type="text" placeholder="name"/>
-                <input name="description" type="text" placeholder="description"/>
+        <main className="projectview">
+            <section className="projects">
+                <ul>
+                    {data.map((d, i) => {
+                        return (<li key={i}>
+                            <div className="projectitem" onClick={() => projectRedirect(d._id)}>
+                                <h3>{d.name}</h3>
+                                <p>{d.description}</p>
+                            </div>
+                            <h4 onClick={() => {
+                                deleteProjectAPI(d._id)
+                                dispatch(deleteProject(d._id))
+                            }}>DEL</h4>
+                        </li>
+                        )
+                    })}
+                </ul>
+                <div className="addbutton" onClick={() => setAdd(true)}>+</div>
+            </section>
+            {add &&<Form method="post">
+                <h2>NEW PROJECT</h2>
+                <span onClick={() => setAdd(false)} className="close">&times;</span>
+                <input name="name" type="text" placeholder="name" />
+                <input name="description" type="text" placeholder="description" />
                 <button>ADD</button>
-            </Form>
-        </section>
+            </Form>}
+        </main>
     )
 }
 
-export const addProjectData = async ({request}) => {
+export const addProjectData = async ({ request }) => {
     const formData = await request.formData()
     const cleanedPost = Object.fromEntries(formData)
     const ret = await addProjectAPI(cleanedPost)
