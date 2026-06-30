@@ -5,7 +5,6 @@ import { addTaskAPI, deleteTaskAPI, updateTaskAPI } from "../services/taskServic
 import { useDispatch } from "react-redux"
 import { addTask, deleteTask, updateTask } from "../slice/TaskSlice"
 import { store } from '../store/store'
-import Members from "./Members"
 import { useEffect, useState } from "react"
 
 export default function Tasks() {
@@ -20,6 +19,8 @@ export default function Tasks() {
         proceed: false
     })
     const actionData = useActionData()
+
+    const [member, setMember] = useState(false)
 
     useEffect(() => {
         if (actionData?.success) {
@@ -38,6 +39,7 @@ export default function Tasks() {
                 <button className="goback" onClick={() => navigate(-1)}>&larr;</button>
                 <h1>TASKS</h1>
                 <button className="addtask" onClick={() => setAdd(true)}>+</button>
+                <button className="addmember" onClick={() => setMember(true)}>add member</button>
             </div>
             <section className="tasks">
                 <ul>
@@ -99,7 +101,12 @@ export default function Tasks() {
                     <button name="intent" value="update">UPDATE</button>
                 </Form>
             }
-            {/* <Members /> */}
+            {member && <section className="members">
+                <h2>MEMBERS</h2>
+                <ul>
+                    
+                </ul>
+                </section>}
         </main>
     )
 }

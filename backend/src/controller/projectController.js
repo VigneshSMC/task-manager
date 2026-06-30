@@ -26,10 +26,11 @@ exports.getProject = async (req, res) => {
 }
 exports.addProject = async (req, res) => {
     try {
-        const { name, description } = req.body
+        const { name, description, members } = req.body
         const project = await Project.create({
             name,
-            description
+            description,
+            members
         })
         res.status(201).json({project})
     }

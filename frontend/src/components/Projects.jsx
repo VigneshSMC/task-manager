@@ -1,6 +1,6 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { getProjectsAPI, deleteProjectAPI, addProjectAPI } from "../services/projectService"
-import { useLoaderData, Form } from "react-router-dom"
+import { useLoaderData, Form, useActionData } from "react-router-dom"
 import { useSelector } from "react-redux"
 import { useDispatch } from "react-redux"
 import { deleteProject, addProject } from "../slice/ProjectSlice"
@@ -18,11 +18,21 @@ const Projects = () => {
         navigate(`/dashboard/projects/${id}/tasks`)
     }
 
+    const actionData = useActionData()
+    console.log(actionData)
+
     const [add, setAdd] = useState()
+    const [error, setError] = useState(false)
+
+    useEffect(() => {
+        setError(true)
+    }, [actionData])
 
     return (
         <main className="projectview">
             <section className="projects">
+                <div className="headerside"><h2>PROJECTS</h2>
+                    <div className="addbutton" onClick={() => setAdd(true)}>+</div></div>
                 <ul>
                     {data.map((d, i) => {
                         return (<li key={i}>
@@ -33,26 +43,30 @@ const Projects = () => {
                             <h4 onClick={() => {
                                 deleteProjectAPI(d._id)
                                 dispatch(deleteProject(d._id))
-                            }}>DEL</h4>
+                            }}>&times;</h4>
                         </li>
                         )
                     })}
                 </ul>
-                <div className="addbutton" onClick={() => setAdd(true)}>+</div>
             </section>
-            {add &&<Form method="post">
+            {add && <Form method="post" onClick={() => setError(false)}>
                 <h2>NEW PROJECT</h2>
                 <span onClick={() => setAdd(false)} className="close">&times;</span>
                 <input name="name" type="text" placeholder="name" />
                 <input name="description" type="text" placeholder="description" />
                 <button>ADD</button>
             </Form>}
+            {error && actionData?.message &&
+                <div className="error"><p>{actionData.message}</p></div>}
         </main>
     )
 }
 
 export const addProjectData = async ({ request }) => {
     const formData = await request.formData()
+    if (formData.get('name') == '' || formData.get('description') == '') {
+        return { message: "name/description cannot be empty" }
+    }
     const cleanedPost = Object.fromEntries(formData)
     const ret = await addProjectAPI(cleanedPost)
     console.log("returned value - ", ret.data.project)
