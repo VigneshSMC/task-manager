@@ -24,16 +24,16 @@ const deleteTaskAPI = async (id, taskId) => {
 const addTaskAPI = async (id, data) => {
     try {
         console.log(data)
-        await API.post(`/projects/${id}${BASE_URL}`, data)
+        return await API.post(`/projects/${id}${BASE_URL}`, data)
     }
     catch (error) {
         console.log({ error: error.message })
     }
 }
 
-const updateTaskAPI = async (id, data) => {
+const updateTaskAPI = async (id, taskId, data) => {
     try {
-        await API.put(`${BASE_URL}/${id}`, data)
+        return await API.put(`/projects/${id}${BASE_URL}/${taskId}`, data)
     }
     catch (error) {
         console.log({ error: error.message })
@@ -49,4 +49,4 @@ const getTaskAPI = async (id) => {
     }
 }
 
-export { getTasksAPI, deleteTaskAPI, addTaskAPI }
+export { getTasksAPI, deleteTaskAPI, addTaskAPI, updateTaskAPI }

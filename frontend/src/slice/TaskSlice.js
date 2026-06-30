@@ -13,10 +13,16 @@ const tasksSlice = createSlice({
             return state.filter(t => t._id !== action.payload)
         },
         addTask: (state, action) => {
-            state.push({title: action.payload.title, description: action.payload.description})
+            console.log("inside add task", action.payload)
+            state.push(action.payload)
+        },
+        updateTask: (state, action) => {
+            console.log("action - ", action)
+            const task = state.find(s => s._id == action.payload._id)
+            Object.assign(task, action.payload)
         }
     }
 })
 
-export const { addTasks, deleteTask, addTask } = tasksSlice.actions
+export const { addTasks, deleteTask, addTask, updateTask } = tasksSlice.actions
 export default tasksSlice.reducer

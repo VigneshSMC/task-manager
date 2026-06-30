@@ -3,7 +3,7 @@ import { getProjectsAPI, deleteProjectAPI, addProjectAPI } from "../services/pro
 import { useLoaderData, Form } from "react-router-dom"
 import { useSelector } from "react-redux"
 import { useDispatch } from "react-redux"
-import { deleteProject } from "../slice/ProjectSlice"
+import { deleteProject, addProject } from "../slice/ProjectSlice"
 import { store } from '../store/store'
 import { useNavigate } from "react-router-dom"
 
@@ -48,7 +48,8 @@ export const addProjectData = async ({request}) => {
     const formData = await request.formData()
     const cleanedPost = Object.fromEntries(formData)
     const ret = await addProjectAPI(cleanedPost)
-    if (ret) store.dispatch(addProject(ret))
+    console.log("returned value - ", ret.data.project)
+    if (ret) store.dispatch(addProject(ret.data.project))
 }
 
 export default Projects;

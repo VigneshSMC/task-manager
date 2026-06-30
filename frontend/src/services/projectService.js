@@ -24,7 +24,7 @@ const deleteProjectAPI = async (id) => {
 
 const addProjectAPI = async (data) => {
     try {
-        await API.post(BASE_URL, data)
+        return await API.post(BASE_URL, data)
     }
     catch (error) {
         console.log({ error: error.message })

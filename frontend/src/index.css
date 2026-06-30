@@ -3,12 +3,11 @@ body {
 }
 
 #root {
-  width: 1126px;
-  max-width: 100%;
+  min-width: 100%;
   margin: 0 auto;
   text-align: center;
   border-inline: 1px solid var(--border);
-  min-height: 100svh;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -183,23 +182,66 @@ body {
   cursor: pointer;
 }
 
+.spec {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: 100%;
+}
+
 .tasks {
-  background-color: rgba(42, 154, 154, 0.659);
-  border-radius: 20px;
-  min-height: fit-content;
   margin: 20px;
   padding: 25px;
+  display: flex;
+  width: 90%;
+}
+
+.spec .top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.spec .top .addtask {
+  position: absolute;
+  right: 60px;
+  width: 30px;
+  height: 30px;
+  background-color: white;
+  border-width: 1px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.spec .top .goback {
+  background-color: white;
+  border-width: 1px;
+  width: 30px;
+  height: 30px;
+  border-radius: 20px;
+  position: absolute;
+  left: 60px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.top h2 {
+  cursor: pointer;
 }
 
 .tasks ul {
   margin: 0;
   padding: 0;
-  height: 100%;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  flex-direction: column;
-  width: 390px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  width: 100%;
+  gap: 20px;
 }
 
 .tasks h3, p {
@@ -209,13 +251,24 @@ body {
 .tasks li {
   background-color: white;
   border-radius: 10px;
-  margin: 10px;
+  border-width: 1px;
+  border-style: solid;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  height: 30px;
+  justify-content: space-between;
+  text-align: left;
   padding: 20px;
-  width: 80%;
+  min-width: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.tasks li h4 {
+  margin-left: 40px;
+}
+
+.tasks li h3 {
+  color: rgb(5, 100, 189);
 }
 
 .tasks div {
@@ -229,25 +282,46 @@ body {
   cursor: pointer;
 }
 
-.tasks form {
+.spec form {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  padding: 5px;
+  padding: 25px;
+  
+  position: fixed;
+  z-index: 1000;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.25);
+  
+  width: 25%;
+  box-sizing: border-box;
 }
 
-.tasks form input {
-  margin: 5px 0 2px 0;
+.spec form input {
+  margin: 10px 0 2px 0;
   border-radius: 8px;
-  border: none;
   outline: none;
   padding-left: 10px;
-  width: 80%;
-  height: 5vh;
+  width: 70%;
+  border-width: 1px;
+  padding: 10px;
 }
 
-.tasks form button {
+.spec form fieldset {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 15px 0 15px 0;
+}
+
+.spec form button {
   color: white;
   background-color: black;
   margin: 10px;
@@ -256,14 +330,50 @@ body {
   border: none;
 }
 
+.spec form .title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.spec form .title h1 {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  margin: 0;
+  font-size: 23px;
+  width: 26px;
+  height: 26px;
+}
+
+
 .taskitem {
   cursor: pointer;
 }
 
-.spec {
+.taskitem h3 {
+  font-size: 30px;
+}
+
+.taskitem .title {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-direction: row;
+  margin-bottom: 10px;
+}
+
+.taskitem .edit {
+  font-size: 20px;
+  margin-left: 20px;
+}
+
+.taskitem p {
+  margin: 2px 0 2px 0;
+  font-size: 15px;
 }
 
 .members .memberbox {
