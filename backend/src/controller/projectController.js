@@ -6,7 +6,7 @@ exports.getProjects = async (req, res) => {
         const { role, id } = req.user
         console.log(role)
         const roleFilter = role === 'admin' ? {} : {members: id}
-        const projects = await Project.find(roleFilter).populate("members")
+        const projects = await Project.find(roleFilter).populate("members", "name")
         res.status(200).json({ message: "Projects retrieved successfuly", body: projects })
     }
     catch(error) {
@@ -27,11 +27,12 @@ exports.getProject = async (req, res) => {
 exports.addProject = async (req, res) => {
     try {
         const { name, description, members } = req.body
-        const project = await Project.create({
+        let project = await Project.create({
             name,
             description,
             members
         })
+        project = await project.populate("members", "name")
         res.status(201).json({project})
     }
     catch(error) {
@@ -41,9 +42,11 @@ exports.addProject = async (req, res) => {
 exports.updateProject = async (req, res) => {
     try {
         const id = req.params.id
-        const {name, description} = req.body
-        const updatedProject = await Project.findByIdAndUpdate(id, {name, description}, {new: true, runValidators: true})
+        const {name, description, members} = req.body
+        console.log(req.body)
+        let updatedProject = await Project.findByIdAndUpdate(id, {name, description, members}, {new: true, runValidators: true})
         if (!updatedProject) return res.status(404).json({message: "project id not found"})
+        updatedProject = await updatedProject.populate("members", "name")
         res.status(200).json({message: "updated successfully", data: updatedProject})
     }
     catch(error) {

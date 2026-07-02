@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, current } from "@reduxjs/toolkit";
 
 const initialState = []
 
@@ -7,14 +7,14 @@ const projectSlice = createSlice({
     initialState,
     reducers: {
         addProjects: (state, action) => {
+            console.log("addProject", action.payload)
             return action.payload
         },
         deleteProject: (state, action) => {
-            console.log(action)
             return state.filter(s => s._id !== action.payload)
         },
         addProject: (state, action) => {
-            state.push({name: action.payload.name, description: action.payload.description})
+            state.push(action.payload)
         },
         updateProject: (state, action) => {
             console.log("Inside project slice", action.payload)
