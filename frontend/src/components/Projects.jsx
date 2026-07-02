@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react"
-import { getProjectsAPI, deleteProjectAPI, addProjectAPI } from "../services/projectService"
+import { getProjectsAPI, deleteProjectAPI, addProjectAPI, updateProjectAPI } from "../services/projectService"
 import { useLoaderData, Form, useActionData } from "react-router-dom"
 import { useSelector } from "react-redux"
 import { useDispatch } from "react-redux"
-import { deleteProject, addProject } from "../slice/ProjectSlice"
+import { deleteProject, addProject, updateProject } from "../slice/ProjectSlice"
 import { store } from '../store/store'
 import { useNavigate } from "react-router-dom"
 
@@ -22,11 +22,20 @@ const Projects = () => {
     console.log(actionData)
 
     const [add, setAdd] = useState()
+    const [update, setUpdate] = useState({ proceed: false })
     const [error, setError] = useState(false)
 
     useEffect(() => {
+        if (actionData?.success) {
+            setUpdate({proceed: false});
+            setAdd(false)
+        }
         setError(true)
     }, [actionData])
+
+    const updateProject = (project) => {
+        setUpdate({ proceed: true, project })
+    }
 
     return (
         <main className="projectview">
@@ -36,8 +45,8 @@ const Projects = () => {
                 <ul>
                     {data.map((d, i) => {
                         return (<li key={i}>
-                            <div className="projectitem" onClick={() => projectRedirect(d._id)}>
-                                <h3>{d.name}</h3>
+                            <div className="projectitem">
+                                <div className="edit"><h3 onClick={() => projectRedirect(d._id)}>{d.name}</h3><h3 onClick={() => updateProject(d)}>&#9998;</h3></div>
                                 <p>{d.description}</p>
                             </div>
                             <h4 onClick={() => {
@@ -54,23 +63,52 @@ const Projects = () => {
                 <span onClick={() => setAdd(false)} className="close">&times;</span>
                 <input name="name" type="text" placeholder="name" />
                 <input name="description" type="text" placeholder="description" />
-                <button>ADD</button>
+                <button name="intent" value="create">ADD</button>
             </Form>}
             {error && actionData?.message &&
                 <div className="error"><p>{actionData.message}</p></div>}
+
+            {update.proceed && <Form method="post" onClick={() => setError(false)}>
+                <h2>UPDATE PROJECT</h2>
+                <input type="hidden" name="id" value={update.project._id} />
+                <span className="close" onClick={() => setUpdate({ proceed: false })}>&times;</span>
+                <input defaultValue={update.project.name} name="name" type="text" placeholder="name" />
+                <input defaultValue={update.project.description} name="description" type="text" placeholder="description" />
+                <button name="intent" value="update">UPDATE</button>
+            </Form>}
         </main>
     )
 }
 
 export const addProjectData = async ({ request }) => {
-    const formData = await request.formData()
-    if (formData.get('name') == '' || formData.get('description') == '') {
-        return { message: "name/description cannot be empty" }
+
+    try {
+
+        const formData = await request.formData()
+        const intent = formData.get('intent')
+        if (formData.get('name') == '' || formData.get('description') == '') {
+            return { message: "name/description cannot be empty" }
+        }
+        const cleanedData = Object.fromEntries(formData)
+
+        if (intent == 'create') {
+            const ret = await addProjectAPI(cleanedData)
+            console.log("returned value - ", ret.data.project)
+            if (ret) store.dispatch(addProject(ret.data.project))
+            return { success: true }
+        }
+        else if (intent == 'update') {
+            const id = formData.get('id')
+            const ret = await updateProjectAPI(id, cleanedData)
+            console.log("Inside projects - ", ret)
+            console.log("update return", ret.data.data)
+            if (ret) store.dispatch(updateProject(ret.data.data))
+            return { success: true}
+        }
     }
-    const cleanedPost = Object.fromEntries(formData)
-    const ret = await addProjectAPI(cleanedPost)
-    console.log("returned value - ", ret.data.project)
-    if (ret) store.dispatch(addProject(ret.data.project))
+    catch (error) {
+        return { success: false }
+    }
 }
 
 export default Projects;

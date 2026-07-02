@@ -151,6 +151,12 @@ body {
   margin-top: 0;
 }
 
+.projectitem .edit {
+  display: flex;
+  align-items: center;
+  gap: calc(1rem/2);
+}
+
 .task {
   display: flex;
   justify-content: center;

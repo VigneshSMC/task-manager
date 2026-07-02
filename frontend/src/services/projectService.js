@@ -33,7 +33,8 @@ const addProjectAPI = async (data) => {
 
 const updateProjectAPI = async (id, data) => {
     try {
-        await API.put(`${BASE_URL}/${id}`, data)
+        console.log("project-service", id, data)
+        return await API.put(`${BASE_URL}/${id}`, data)
     }
     catch (error) {
         console.log({ error: error.message })
@@ -49,4 +50,4 @@ const getProjectAPI = async (id) => {
     }
 }
 
-export { getProjectsAPI, deleteProjectAPI, addProjectAPI }
+export { getProjectsAPI, deleteProjectAPI, addProjectAPI, updateProjectAPI }
