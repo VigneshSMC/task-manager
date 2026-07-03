@@ -43,11 +43,12 @@ const updateProjectAPI = async (id, data) => {
 
 const getProjectAPI = async (id) => {
     try {
-        await API.get(`BASE_URL/${id}`, data)
+        console.log("id value", id)
+        return await API.get(`${BASE_URL}/${id}`)
     }
     catch (error) {
         console.log({ error: error.message })
     }
 }
 
-export { getProjectsAPI, deleteProjectAPI, addProjectAPI, updateProjectAPI }
+export { getProjectsAPI, deleteProjectAPI, addProjectAPI, updateProjectAPI, getProjectAPI }

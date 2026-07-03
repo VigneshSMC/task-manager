@@ -1,12 +1,13 @@
 import { Suspense, useEffect, useState } from "react"
 import { getProjectsAPI, deleteProjectAPI, addProjectAPI, updateProjectAPI } from "../services/projectService"
-import { useLoaderData, Form, useActionData, Await } from "react-router-dom"
+import { Form as RouterForm, useLoaderData, useActionData, Await } from "react-router-dom"
 import { useSelector } from "react-redux"
 import { useDispatch } from "react-redux"
 import { deleteProject, addProject, updateProject } from "../slice/ProjectSlice"
 import { store } from '../store/store'
 import { useNavigate } from "react-router-dom"
 import { getAllUsers } from "../services/userService"
+import { Button, Card, Col, Container, Form, ListGroup, Modal, Row, Alert } from "react-bootstrap"
 
 const Projects = () => {
 
@@ -47,7 +48,7 @@ const Projects = () => {
 
     const handleUpdate = (project) => {
         const users = getAllUsers()
-        console.log("Users - ", users)
+        console.log("Users - ", users, project)
         setSelectedUsers(project.members)
         setUpdate({ proceed: true, project, users })
     }
@@ -57,85 +58,145 @@ const Projects = () => {
         console.log("members updated", selectedUsers)
     }
 
+    const removeSelectedMembers = (s) => {
+        setSelectedUsers(selectedUsers.filter(d => d._id !== s._id))
+    }
+
     return (
-        <main className="projectview">
-            <section className="projects">
-                <div className="headerside"><h2>PROJECTS</h2>
-                    <div className="addbutton" onClick={() => handleAdd()}>+</div></div>
-                <ul>
-                    {data.map(d => {
-                        return (<li key={d._id}>
-                            <div className="projectitem">
-                                <div className="edit"><h3 onClick={() => projectRedirect(d._id)}>{d.name}</h3>
-                                    <h3 onClick={() => handleUpdate(d)}>&#9998;</h3></div>
-                                <p>{d.description}</p>
-                                <h3>Members: </h3>{d.members.map(m => (<p>{m.name}</p>))}
-                            </div>
-                            <h4 onClick={() => {
-                                deleteProjectAPI(d._id)
-                                dispatch(deleteProject(d._id))
-                            }}>&times;</h4>
-                        </li>
-                        )
-                    })}
-                </ul>
-            </section>
-            {add.proceed && <Form method="post" onClick={() => setError(false)}>
-                {selectedUsers.map(s => <input key={s._id} type="hidden" name="members" value={s._id} />)}
-                <h2>NEW PROJECT</h2>
-                <span onClick={() => setAdd({ proceed: false })} className="close">&times;</span>
-                <input name="name" type="text" placeholder="name" />
-                <input name="description" type="text" placeholder="description" />
-                <button htmlFor="users" onClick={() => setSeeMembers(true)}>add members</button>
-                <Suspense>
-                    <Await resolve={add.users}>
-                        {resolved => (
-                            seeMembers && <div className="addmembers">
-                                <div onClick={() => setSeeMembers(false)}>&times;</div>
-                                <ul name="users" id="users">
-                                    {resolved.map(r => (
-                                        <div key={r._id}><li onClick={() =>
-                                            updateSelectedMembers(r)} name={r._id} value={r._id}>{r.name} -- {r.email}</li><hr /></div>
+        <Container className="container py-4">
+            <div className="d-flex align-items-center justify-content-between mb-4">
+                <h2>PROJECTS</h2>
+                <Button className="addbutton" onClick={() => handleAdd()}>+</Button></div>
+            <Row xs={2} md={3} lg={5} className="g-4 mb-4">
+                {data.map(d => {
+                    return (<Col key={d._id}>
+                        <Card>
+                            <Card.Header className="bg-primary pt-3 text-white d-flex justify-content-between align-items-start">
+                                <Card.Title style={{ cursor: 'pointer' }} onClick={() => projectRedirect(d._id)}>{d.name}</Card.Title>
+                                <Button variant="link" className="p-0 text-dark" onClick={() => handleUpdate(d)}>&#9998;</Button>
+                            </Card.Header>
+                            <Card.Body className="edit">
+                                <Card.Text>{d.description}</Card.Text>
+                                <h6 className="mt-3">Members: </h6>
+                                <ListGroup horizontal className="d-flex flex-wrap gap-2">
+                                    {d.members.map(m => (
+                                        <ListGroup.Item key={m._id} className="p-2 border-2">
+                                            {m.name}
+                                        </ListGroup.Item>
                                     ))}
-                                </ul>
-                            </div>
-                        )}
-                    </Await>
-                </Suspense>
-                <div className="memberlist">{selectedUsers.map(n => <span key={n._id}>{n.name} <br /></span>)}</div>
-                <button name="intent" value="create">ADD</button>
-            </Form>}
+                                </ListGroup>
+                            </Card.Body>
+                            <Card.Footer className="bg-transparent border-top-0 text-end">
+                                <Button variant="outline-danger" size="sm" onClick={() => {
+                                    deleteProjectAPI(d._id)
+                                    dispatch(deleteProject(d._id))
+                                }} >
+                                    &times;
+                                </Button>
+                            </Card.Footer>
+                        </Card>
+                    </Col>
+                    )
+                })}
+            </Row>
+            <Modal show={add.proceed}>
+                <RouterForm method="post" onClick={() => setError(false)}>
+                    <Modal.Header>
+                        <Modal.Title>NEW PROJECT</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        {selectedUsers.map(s => <input key={s._id} type="hidden" name="members" value={s._id} />)}
+                        <Form.Group className="mb-3">
+                            <Form.Label>Project Name</Form.Label>
+                            <Form.Control name="name" type="text" placeholder="enter project name" />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Description</Form.Label>
+                            <Form.Control name="description" type="text" placeholder="enter description" />
+                        </Form.Group>
+                        <Button className="mb-3" variant="secondary" onClick={() => setSeeMembers(true)}>Add Members</Button>
+                        <div className="mb-3">
+                            <h6>Selected Members:</h6>
+                            {selectedUsers.map(n => <span className="d-inline-flex align-items-center me-2 bg-light px-3 py-1 gap-3 border rounded">
+                                <span key={n._id}>{n.name}</span><span style={{cursor: 'pointer'}} onClick={() => removeSelectedMembers(n)}>&times;</span></span>)}</div>
+                        <Suspense fallback={<div>Loading users...</div>}>
+                            <Await resolve={add.users}>
+                                {resolved => (
+                                    seeMembers &&
+                                    <Card className="mb-3 bg-light" style={{ maxHeight: '150px', overflowY: 'auto' }}>
+                                        <ListGroup variant="flush">
+                                            {
+                                                resolved?.map(r => (
+                                                    <ListGroup.Item key={r._id} onClick={() =>
+                                                        updateSelectedMembers(r)} style={{ cursor: 'pointer' }}> {r.name} -- {r.email}
+                                                    </ListGroup.Item>
+                                                ))
+                                            }
+                                        </ListGroup>
+                                    </Card>
+                                )}
+                            </Await>
+                        </Suspense>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={() => {setAdd({ proceed: false }); setSeeMembers(false)}}>
+                            Close
+                        </Button>
+                        <Button variant="primary" name="intent" value="create" type="submit">
+                            ADD
+                        </Button>
+                    </Modal.Footer>
+                </RouterForm>
+            </Modal>
             {error && actionData?.message &&
                 <div className="error"><p>{actionData.message}</p></div>}
 
-            {update.proceed && <Form className="update" method="post" onClick={() => setError(false)}>
-                <span className="close" onClick={() => setUpdate({ proceed: false })}>&times;</span>
-                <h2>UPDATE PROJECT</h2>
-                {selectedUsers.map(s => <input type="hidden" name="members" value={s._id} />)}
-                <input type="hidden" name="id" value={update.project._id} />
-                <label htmlFor="name">Project Name</label>
-                <input defaultValue={update.project.name} id="name" name="name" type="text" placeholder="name" />
-                <label htmlFor="description">Description</label>
-                <input defaultValue={update.project.description} id="name" name="description" type="text" placeholder="description" />
-                <button htmlFor="users" onClick={() => setSeeMembers(true)}>add members</button>
-                <Suspense>
-                    <Await resolve={update.users}>
-                        {resolved => (
-                            seeMembers && <div className="addmembers">
-                                <div onClick={() => setSeeMembers(false)}>&times;</div>
-                                <ul onChange={() => def()} name="users" id="users">
-                                    {resolved.map(r => (
-                                        <div key={r._id}><li onClick={() => updateSelectedMembers(r)} name={r._id} value={r._id}>{r.name} -- {r.email}</li><hr /></div>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-                    </Await>
-                </Suspense>
-                <div className="memberlist">{selectedUsers.map(n => <span key={n._id}>{n.name} <br /></span>)}</div>
-                <button name="intent" value="update">UPDATE</button>
-            </Form>}
-        </main>
+            <Modal show={update.proceed} onHide={() => setUpdate({proceed: false})}>
+                <RouterForm className="update" method="post" onClick={() => setError(false)}>
+                    <Modal.Header>
+                        UPDATE PROJECT
+                    </Modal.Header>
+                    <Modal.Body>
+                        {selectedUsers.map(s => <input key={s._id} type="hidden" name="members" value={s._id} />)}
+                        <input type="hidden" name="id" value={update.project ? update.project._id : ''} />
+                        <Form.Group className="mb-3">
+                            <Form.Label>Project Name</Form.Label>
+                            <Form.Control defaultValue={update.project ? update.project.name : ''} name="name" type="text" />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Description</Form.Label>
+                            <Form.Control defaultValue={update.project ? update.project.description : ''} name="description" type="text" />
+                        </Form.Group>
+                        <Button onClick={() => setSeeMembers(true)}>Add Members</Button>
+                        <div className="my-2">
+                            <h6>Selected Members: </h6>
+                            {selectedUsers.map(n => <span className="d-inline-flex align-items-center me-2 bg-light px-3 py-1 gap-3 border rounded">
+                                <span key={n._id}>{n.name}</span><span style={{cursor: 'pointer'}} onClick={() => removeSelectedMembers(n)}>&times;</span></span>)}
+                        </div>
+                        <Suspense>
+                            <Await resolve={update.users}>
+                                {resolved => (
+                                    seeMembers && <Card className="mb-3 bg-light" style={{ maxHeight: '150px', overflowY: 'auto' }}>
+                                        <ListGroup onChange={() => def()} name="users" id="users">
+                                            {resolved?.map(r => (
+                                                <ListGroup.Item key={r._id} onClick={() => updateSelectedMembers(r)} style={{ cursor: 'pointer' }}>
+                                                    {r.name} -- {r.email}
+                                                </ListGroup.Item>
+                                            ))}
+                                        </ListGroup>
+                                    </Card>
+                                )}
+                            </Await>
+                        </Suspense>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={() => {setUpdate({ proceed: false }); setSeeMembers(false)}}>Close</Button>
+                        <Button variant="primary" name="intent" value="update" type="submit">UPDATE</Button>
+                    </Modal.Footer>
+                </RouterForm>
+            </Modal>
+        </Container>
     )
 }
 

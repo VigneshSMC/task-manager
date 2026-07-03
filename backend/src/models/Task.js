@@ -25,6 +25,10 @@ const TaskSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Project",
         required: [true, "task must belong to a project"]
+    },
+    assignee: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
     }
 }, {
     timestamps: true

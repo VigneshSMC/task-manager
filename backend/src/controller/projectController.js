@@ -16,7 +16,7 @@ exports.getProjects = async (req, res) => {
 exports.getProject = async (req, res) => {
     try {
         const id = req.params.id
-        const project = await Project.findOne({_id: id})
+        const project = await Project.findOne({_id: id}).populate("members", "name")
         if (!project) return res.status(404).json({error: " project id not available"})
         res.status(200).json({project})
     }

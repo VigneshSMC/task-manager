@@ -25,13 +25,14 @@ exports.getTask = async (req, res) => {
 exports.addTask = async (req, res) => {
     try {
         const id = req.params.id;
-        const { title, description, priority, status } = req.body
+        const { title, description, priority, status, user } = req.body
         const task = await Task.create({
             title,
             description,
             project_id: id,
             priority,
-            status
+            status,
+            user
         })
         res.status(201).json({task})
     }
@@ -43,8 +44,8 @@ exports.updateTask = async (req, res) => {
     try {
         const projId = req.params.id
         const taskId = req.params.taskId
-        const {title, description, priority, status} = req.body
-        const updatedTask = await Task.findByIdAndUpdate(taskId, {title, description, project_id: projId, priority, status}, {new: true, runValidators: true})
+        const {title, description, priority, status, user} = req.body
+        const updatedTask = await Task.findByIdAndUpdate(taskId, {title, description, project_id: projId, priority, status, user}, {new: true, runValidators: true})
         if (!updatedTask) return res.status(404).json({message: "task id not found"})
         res.status(200).json({message: "updated successfully", data: updatedTask})
     }
