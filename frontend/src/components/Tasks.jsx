@@ -6,13 +6,13 @@ import { useDispatch } from "react-redux"
 import { addTask, deleteTask, updateTask } from "../slice/TaskSlice"
 import { store } from '../store/store'
 import { useEffect, useState } from "react"
-import { Badge, Button, Card, Col, Container, Form, Modal, Row } from "react-bootstrap"
+import { Badge, Button, Card, Col, Container, Form, ListGroup, Modal, Row } from "react-bootstrap"
 import { getProjectAPI } from "../services/projectService"
 
 export default function Tasks() {
 
     const tasks = useSelector(state => state.tasks)
-    console.log(tasks.length)
+    console.log("tasks", tasks)
     const navigate = useNavigate()
     const dispatch = useDispatch()
     console.log(tasks)
@@ -25,11 +25,15 @@ export default function Tasks() {
     const params = useParams()
 
     const [member, setMember] = useState(false)
+    const [assignUser, setAssignUser] = useState(false)
+    const [searchTerm, setSearchTerm] = useState('')
+    const [selectedUser, setSelectedUser] = useState('')
 
     useEffect(() => {
         if (actionData?.success) {
             setAdd(false)
             setEdit({ proceed: false, task: null })
+            setAssignUser(false)
         }
     }, [actionData])
 
@@ -39,10 +43,12 @@ export default function Tasks() {
 
     const loadMembers = async () => {
         const current = await getProjectAPI(params.id)
-        setProject(current.data.project)
-        console.log(project)
-        setMember(true)
+        setProject(await current.data?.project)
+        console.log("Project", project)
     }
+
+    const filteredusers = project?.members?.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    console.log("filtered users", filteredusers)
 
     return (
         <div >
@@ -50,8 +56,8 @@ export default function Tasks() {
             <Container >
                 <div className="d-flex justify-content-between mb-3">
                     <Button className="border-2 rounded-5 me-auto" style={{ width: "40px", height: "40px" }} onClick={() => navigate(-1)}>&larr;</Button>
-                    <Button className="ms-auto" onClick={() => setAdd(true)}>+</Button>
-                    <Button className="ms-2" onClick={() => loadMembers()}>members</Button>
+                    <Button className="ms-auto" onClick={() => { loadMembers(); setAdd(true); setSelectedUser('') }}>+</Button>
+                    <Button className="ms-2" onClick={() => { loadMembers(); setMember(true); }}>members</Button>
                 </div>
                 <Row xs={2} md={3} lg={4} className="g-4 mt-5">
                     {tasks.map((d, i) => {
@@ -59,7 +65,7 @@ export default function Tasks() {
                             <Card>
                                 <Card.Header className="d-flex justify-content-between align-items-center w-100 pb-1 bg-primary">
                                     <Card.Title className="text-white">{d.title}</Card.Title>
-                                    <Button variant="link text-black" style={{ cursor: 'pointer' }} className="" onClick={() => update(d)}>&#9998;</Button>
+                                    <Button variant="link text-black" style={{ cursor: 'pointer' }} className="" onClick={() => { loadMembers(); update(d); setSelectedUser(d?.assignee) }}>&#9998;</Button>
                                 </Card.Header>
                                 <Card.Body className="m-0">
                                     <Card.Text>{d.description}</Card.Text>
@@ -77,12 +83,11 @@ export default function Tasks() {
                                         </Badge>
                                     </div>
 
-                                    {d.user && (
-                                        <div className="border-top pt-2 mt-2 d-flex align-items-center justify-content-between small text-muted">
-                                            <span className="fw-semibold">Assigned To:</span>
-                                            <span className="text-dark fw-medium">{d.user}</span>
-                                        </div>
-                                    )}
+                                    <div className="border-top pt-2 mt-2 d-flex align-items-center justify-content-between small text-muted">
+                                        <span className="fw-semibold">Assigned To:</span>
+                                        <span className="text-dark fw-medium">{d.assignee ? d.assignee?.name : 'NONE'}</span>
+                                    </div>
+
                                 </Card.Body>
                                 <Card.Footer className="border-top-0 bg-transparent text-end">
                                     <Button variant="outline-danger" onClick={() => {
@@ -111,11 +116,32 @@ export default function Tasks() {
                                 </Form.Label>
                                 <Form.Control name="description" type="text" placeholder="enter description" />
                             </Form.Group>
+                            <Button className="d-inline-flex mb-2" onClick={() => { setAssignUser(prev => !prev) }}>ASSIGN USER </Button>
+                            {selectedUser && <div><h6 className="d-inline-flex">Assigned to:</h6>
+                                <span className="d-inline ms-2">{selectedUser?.name}</span>
+                                <input type="hidden" name="assignee" value={selectedUser?._id} /></div>}
+                            {assignUser && (<Card>
+                                <Form.Control type="text" placeholder="search members" className="mb-2" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}></Form.Control>
+                                <ListGroup style={{ overflowY: 'auto', maxHeight: '150px', cursor: 'pointer' }}>
+                                    {filteredusers?.map(u => {
+                                        return (
+                                            <ListGroup.Item onClick={() => { setAssignUser(false); setSelectedUser(u) }} key={u._id}>
+                                                {u.name}
+                                            </ListGroup.Item>
+                                        )
+                                    })}
+                                </ListGroup>
+                            </Card>)}
                             <fieldset className="mb-3">
-                                <legend className="m-0">Priority</legend>
-                                <label htmlFor="low">Low<input defaultChecked value="low" id="low" name="priority" type="radio" /></label>
-                                <label htmlFor="medium">Medium<input value="medium" id="medium" name="priority" type="radio" /></label>
-                                <label htmlFor="high">High<input value="high" id="high" name="priority" type="radio" /></label>
+                                <legend>Priority</legend>
+                                <div className="d-flex gap-2">
+                                    <label htmlFor="low">Low</label>
+                                    <input defaultChecked value="low" id="low" name="priority" type="radio" />
+                                    <label htmlFor="medium">Medium</label>
+                                    <input value="medium" id="medium" name="priority" type="radio" />
+                                    <label htmlFor="high">High</label>
+                                    <input value="high" id="high" name="priority" type="radio" />
+                                </div>
                             </fieldset>
                             <select name="status">
                                 <option value="to do">TO DO</option>
@@ -125,7 +151,7 @@ export default function Tasks() {
                             </select>
                         </Modal.Body>
                         <Modal.Footer>
-                            <Button variant="secondary" onClick={() => setAdd(false)}>Close</Button>
+                            <Button variant="secondary" onClick={() => { setAdd(false); setAssignUser(false) }}>Close</Button>
                             <Button name="intent" value="create" type="submit">ADD</Button>
                         </Modal.Footer>
                     </RouterForm>
@@ -145,11 +171,33 @@ export default function Tasks() {
                                 <Form.Label><h5>Description</h5></Form.Label>
                                 <Form.Control defaultValue={edit.task ? edit.task.description : ''} name="description" type="text" placeholder="enter description" />
                             </Form.Group>
+                            <Button className="d-inline-flex mb-2" onClick={() => { setAssignUser(prev => !prev) }}>UPDATE USER</Button>
+                            {selectedUser && <div><h6 className="d-inline-flex">Assigned to:</h6>
+                                <span className="d-inline ms-2">{selectedUser?.name}</span>
+                                <input type="hidden" name="assignee" value={selectedUser?._id} /></div>}
+                            <input type="hidden" name="assignee" value={selectedUser?._id} />
+                            {assignUser && (<Card>
+                                <Form.Control type="text" placeholder="search members" className="mb-2" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}></Form.Control>
+                                <ListGroup style={{ overflowY: 'auto', maxHeight: '150px', cursor: 'pointer' }}>
+                                    {filteredusers?.map(u => {
+                                        return (
+                                            <ListGroup.Item onClick={() => { setAssignUser(false); setSelectedUser(u) }} key={u._id}>
+                                                {u.name}
+                                            </ListGroup.Item>
+                                        )
+                                    })}
+                                </ListGroup>
+                            </Card>)}
                             <fieldset className="mb-3">
-                                <legend className="m-0">Priority</legend>
-                                <label htmlFor="low">Low<input defaultChecked={edit.task ? edit.task.priority == 'low' : ''} value="low" id="low" name="priority" type="radio" /></label>
-                                <label htmlFor="medium">Medium<input defaultChecked={edit.task ? edit.task.priority == 'medium' : ''} value="medium" id="medium" name="priority" type="radio" /></label>
-                                <label htmlFor="high">High<input defaultChecked={edit.task ? edit.task.priority == 'high' : ''} value="high" id="high" name="priority" type="radio" /></label>
+                                <legend>Priority</legend>
+                                <div className="d-flex gap-2">
+                                    <label htmlFor="low">Low</label>
+                                    <input defaultChecked value="low" id="low" name="priority" type="radio" />
+                                    <label htmlFor="medium">Medium</label>
+                                    <input value="medium" id="medium" name="priority" type="radio" />
+                                    <label htmlFor="high">High</label>
+                                    <input value="high" id="high" name="priority" type="radio" />
+                                </div>
                             </fieldset>
                             <select defaultValue={edit.task ? edit.task.status : ''} name="status">
                                 <option value="to do">TO DO</option>
@@ -159,7 +207,7 @@ export default function Tasks() {
                             </select>
                         </Modal.Body>
                         <Modal.Footer>
-                            <Button variant="secondary" onClick={() => setEdit({ proceed: false })}>Close</Button>
+                            <Button variant="secondary" onClick={() => { setAssignUser(false); setEdit({ proceed: false }) }}>Close</Button>
                             <Button name="intent" value="update" type="submit">UPDATE</Button>
                         </Modal.Footer>
                     </RouterForm>
@@ -201,6 +249,7 @@ export const taskAction = async ({ request, params }) => {
     const formData = await request.formData()
     const intent = formData.get('intent')
     const cleanedData = Object.fromEntries(formData)
+    console.log("cleaned data", cleanedData)
     try {
         if (intent === 'create') {
             const ret = await addTaskAPI(id, cleanedData)

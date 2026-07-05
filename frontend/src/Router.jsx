@@ -38,9 +38,9 @@ const router = createBrowserRouter([
                         return allProjects
                     }
                     const data = await getProjectsAPI()
-                    store.dispatch(addProjects(data.body))
-                    console.log("loaded through api - ", data.body)
-                    return data.body
+                    store.dispatch(addProjects(data?.body))
+                    console.log("loaded through api - ", data?.body)
+                    return data?.body
                 }
             }
         ]
@@ -57,7 +57,7 @@ const router = createBrowserRouter([
             }
             const data = await getTasksAPI(id)
             console.log("loaded through api")
-            store.dispatch(addTasks(data.body))
+            store.dispatch(addTasks(data?.body))
             return data
         }
     }
