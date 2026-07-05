@@ -117,8 +117,8 @@ const Projects = () => {
                         <Button className="mb-3" variant="secondary" onClick={() => setSeeMembers(true)}>Add Members</Button>
                         <div className="mb-3">
                             <h6>Selected Members:</h6>
-                            {selectedUsers.map(n => <span className="d-inline-flex align-items-center me-2 bg-light px-3 py-1 gap-3 border rounded">
-                                <span key={n._id}>{n.name}</span><span style={{cursor: 'pointer'}} onClick={() => removeSelectedMembers(n)}>&times;</span></span>)}</div>
+                            {selectedUsers.map(n => <span key={n._id} className="d-inline-flex align-items-center me-2 bg-light px-3 py-1 gap-3 border rounded">
+                                <span>{n.name}</span><span style={{cursor: 'pointer'}} onClick={() => removeSelectedMembers(n)}>&times;</span></span>)}</div>
                         <Suspense fallback={<div>Loading users...</div>}>
                             <Await resolve={add.users}>
                                 {resolved => (

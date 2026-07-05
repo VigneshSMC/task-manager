@@ -1,3 +1,4 @@
+import { fetchAuthSession } from 'aws-amplify/auth'
 import axios from 'axios'
 
 const URL = import.meta.env.VITE_API_URL
@@ -10,8 +11,9 @@ const API = axios.create({
 })
 
 API.interceptors.request.use(
-    config => {
-        const token = localStorage.getItem('token')
+    async config => {
+        const session = await fetchAuthSession()
+        const token = session.tokens?.idToken?.toString()
         if (token) config.headers.Authorization = `Bearer ${token}`
         return config
     },

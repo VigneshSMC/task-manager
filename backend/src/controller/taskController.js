@@ -4,7 +4,7 @@ const mongoose = require('mongoose')
 exports.getTasks = async (req, res) => {
     try {
         const id = req.params.id
-        const tasks = await Task.find({project_id: id}).populate("assignee", "-password")
+        const tasks = await Task.find({project_id: id}).populate("assignee")
         res.status(200).json({ message: "Tasks retrieved successfuly", body: tasks })
     }
     catch(error) {

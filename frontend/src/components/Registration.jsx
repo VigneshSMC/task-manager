@@ -1,7 +1,8 @@
-import { Form, redirect } from 'react-router-dom'
+import { Form, NavLink, redirect } from 'react-router-dom'
 import { registerUser } from '../services/authService'
 import { useEffect, useState } from 'react'
 import { useActionData } from 'react-router-dom'
+import { Button } from 'react-bootstrap'
 
 export default function Registration() {
 
@@ -15,23 +16,24 @@ export default function Registration() {
     const [popUp, setPopUp] = useState()
 
     return (
-        <main className="login">
-            <h2>Registration</h2>
+        <main className="d-flex flex-column justify-content-center align-items-center 
+        gap-2 p-5 rounded shadow-lg">
+            <h2>Register</h2>
             <section>
-                <Form method="post">
-                    <div>
+                <Form method="post" className='d-flex flex-column gap-3'>
+                    <div className='d-flex justify-content-between gap-2'>
                         <label htmlFor="name">Name: </label>
                         <input type="text" id='name' name='name' />
                     </div>
-                    <div>
+                    <div className='d-flex justify-content-between gap-2'>
                         <label htmlFor="email">Email: </label>
                         <input name="email" type="email" id="email" />
                     </div>
-                    <div>
+                    <div className='d-flex justify-content-between gap-2'>
                         <label htmlFor="password">Password: </label>
                         <input name="password" type="password" id="password" />
                     </div>
-                    <button>Register</button>
+                    <Button>Register</Button><NavLink className="ms-2" to="/login">Login</NavLink>
                 </Form>
                 {actionData?.error && popUp && <span className='error'><h4>{actionData.error}</h4><h3 onClick={() => setPopUp(false)} className='close'>&times;</h3></span>}
             </section>

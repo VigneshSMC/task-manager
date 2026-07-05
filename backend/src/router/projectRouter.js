@@ -4,15 +4,16 @@ const { getProjects, getProject, updateProject, addProject, deleteProject, invit
 const { projectValidation } = require('../middleware/idValidation')
 const { postValidation } = require('../middleware/projectValidation')
 const taskRouter = require('../router/taskRouter')
-const { protect } = require('../middleware/authValidation')
+const { protect, cognitoAuth } = require('../middleware/authValidation')
+const userGenerator = require('../middleware/userGenerator')
 
-router.use("/:id/tasks", protect, taskRouter)
+router.use("/:id/tasks", cognitoAuth, taskRouter)
 
-router.get("/", protect, getProjects)
-router.get("/:id", protect, projectValidation, getProject)
-router.put("/:id", protect, projectValidation, updateProject)
-router.delete("/:id", protect, projectValidation, deleteProject)
-router.post("/", protect, postValidation, addProject)
+router.get("/", cognitoAuth, userGenerator, getProjects)
+router.get("/:id", cognitoAuth, projectValidation, getProject)
+router.put("/:id", cognitoAuth, projectValidation, updateProject)
+router.delete("/:id", cognitoAuth, projectValidation, deleteProject)
+router.post("/", cognitoAuth, postValidation, addProject)
 
 router.post("/:id/memebers", inviteAndAssign)
 

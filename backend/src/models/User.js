@@ -10,13 +10,9 @@ const userSchema = new mongoose.Schema({
         required: [true, 'please provide an email id'],
         unique: true
     },
-    password: {
-        type: String,
-        required: [true, 'please provide a password']
-    },
     role: {
         type: String,
-        enum: ["user", "admin"],
+        enum: ["user", "admin", "manager"],
         default: "user"
     }
 },{

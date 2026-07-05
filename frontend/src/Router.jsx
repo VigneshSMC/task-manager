@@ -11,26 +11,39 @@ import RootPage from "./pages/RootPage";
 import Registration, { registerAction } from "./components/Registration";
 import { getTasksAPI } from "./services/taskService";
 
+import { Amplify } from 'aws-amplify';
+
+import { fetchAuthSession, signOut, signInWithRedirect } from 'aws-amplify/auth'
+import RequireAuth from "./components/RequireAuth";
+
+const checkAuthentication = async () => {
+    try {
+        const session = await fetchAuthSession()
+        console.log("session", session)
+        return !!session?.tokens?.idToken
+    }
+    catch (error) {
+        return false
+    }
+}
+
 const router = createBrowserRouter([
     {
-        path: "/", element: <RootPage />, loader: () => {
-            localStorage.clear()
-        }, children: [
-            { index: true, element: <Navigate to="login" replace /> },
+        path: "/", element: <RootPage />, children: [
+            { index: true, element: <Navigate to="login" /> },
             { path: "login", element: <Login />, action: loginAction },
-            { path: "Registration", element: <Registration />, action: registerAction }
+            { path: "registration", element: <Registration />, action: registerAction }
         ]
     },
     {
-        path: "/dashboard", element: <Dashboard />, loader: () => {
-            if (!localStorage.getItem('token')) {
-                throw redirect("/")
-            }
-            return null
-        }, children: [
+        path: "/dashboard", element: <RequireAuth><Dashboard /></RequireAuth>, children: [
             { index: true, element: <Navigate to="projects" /> },
             {
                 path: "projects", element: <Projects />, action: addProjectData, loader: async () => {
+                    const isAuthenticated = await checkAuthentication()
+                    if (!isAuthenticated) {
+                        return redirect("/")
+                    }
                     const allProjects = store.getState().projects
                     console.log(allProjects)
                     if (allProjects && allProjects.length > 0) {
@@ -47,6 +60,10 @@ const router = createBrowserRouter([
     },
     {
         path: "/dashboard/projects/:id/tasks", element: <Tasks />, action: taskAction, loader: async ({ params }) => {
+            const isAuthenticated = await checkAuthentication();
+            if (!isAuthenticated) {
+                return redirect("/");
+            }
             const id = params.id
             console.log(id)
             const currentState = store.getState().tasks

@@ -1,12 +1,26 @@
-import { Outlet, NavLink } from "react-router-dom";
+import { Button, Container } from "react-bootstrap";
+import { Outlet, NavLink, redirect } from "react-router-dom";
+
+import { fetchAuthSession, signInWithRedirect } from "aws-amplify/auth";
 
 export default function RootPage() {
+
+    const handleAwsSignIn = async () => {
+        try {
+            await signInWithRedirect()
+        }
+        catch(e) {
+            console.log("Aws hosted UI redirection failed", e)
+        }
+    }
+
     return (
-        <div className="rootpage">
-            <h1>Home</h1>
-            <NavLink to="/login">Login</NavLink>
-            <NavLink to="/registration">Registration</NavLink>
-            <Outlet />
-        </div>
+        <Container className="d-flex flex-row justify-content-center align-items-center gap-2" style={{marginTop: '8rem'}}>
+                <h1 className="py-3 px-4 me-5 rounded bg-success text-white">SMART TASK MANAGER</h1>
+                <div className="d-flex flex-column justify-content-center align-items-center">
+                    <Outlet />
+                    <Button className="w-75 mt-3" onClick={() => handleAwsSignIn()}>Register/Login with Amazon</Button>
+                </div>
+        </Container>
     )
 }
