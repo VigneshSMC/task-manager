@@ -1,35 +1,26 @@
-import { createBrowserRouter, Navigate, redirect } from "react-router-dom"
+import { createBrowserRouter, Navigate, redirect, useNavigate } from "react-router-dom"
 import Dashboard from "./pages/Dashboard"
-import Projects, { addProjectData } from "./components/Projects";
+import Projects from "./components/Projects";
 import { getProjectsAPI } from "./services/projectService";
 import { store } from './store/store'
 import { addProjects } from "./slice/ProjectSlice";
 import { addTasks } from "./slice/TaskSlice";
-import Tasks, { taskAction } from "./components/Tasks";
-import Login, { loginAction } from "./components/Login";
+import { addUser } from "./slice/UserSlice";
+import Tasks from "./components/Tasks";
+import Login from "./components/Login";
 import RootPage from "./pages/RootPage";
-import Registration, { registerAction } from "./components/Registration";
+import Registration from "./components/Registration";
 import { getTasksAPI } from "./services/taskService";
+import { processData, taskAction, registerAction, loginAction } from "./services/formService";
 
 import { Amplify } from 'aws-amplify';
 
-import { fetchAuthSession, signOut, signInWithRedirect } from 'aws-amplify/auth'
+import { fetchAuthSession, signOut, signInWithRedirect, getCurrentUser } from 'aws-amplify/auth'
 import RequireAuth from "./components/RequireAuth";
-
-const checkAuthentication = async () => {
-    try {
-        const session = await fetchAuthSession()
-        console.log("session", session)
-        return !!session?.tokens?.idToken
-    }
-    catch (error) {
-        return false
-    }
-}
 
 const router = createBrowserRouter([
     {
-        path: "/", element: <RootPage />, children: [
+        path: "/", element: <RootPage />, hydrateFallbackElement: <></>, children: [
             { index: true, element: <Navigate to="login" /> },
             { path: "login", element: <Login />, action: loginAction },
             { path: "registration", element: <Registration />, action: registerAction }
@@ -39,11 +30,15 @@ const router = createBrowserRouter([
         path: "/dashboard", element: <RequireAuth><Dashboard /></RequireAuth>, children: [
             { index: true, element: <Navigate to="projects" /> },
             {
-                path: "projects", element: <Projects />, action: addProjectData, loader: async () => {
-                    const isAuthenticated = await checkAuthentication()
-                    if (!isAuthenticated) {
-                        return redirect("/")
-                    }
+                path: "projects", element: <Projects />, action: processData, loader: async () => {
+
+                    const user = await getCurrentUser()
+                    const email = user?.signInDetails?.loginId || []
+                    const session = await fetchAuthSession()
+                    const groups = session?.tokens?.idToken?.payload['cognito:groups'] || []
+                    store.dispatch(addUser({email, groups}))
+                    console.log("from redux", store.getState().user)
+
                     const allProjects = store.getState().projects
                     console.log(allProjects)
                     if (allProjects && allProjects.length > 0) {
@@ -59,13 +54,10 @@ const router = createBrowserRouter([
         ]
     },
     {
-        path: "/dashboard/projects/:id/tasks", element: <Tasks />, action: taskAction, loader: async ({ params }) => {
-            const isAuthenticated = await checkAuthentication();
-            if (!isAuthenticated) {
-                return redirect("/");
-            }
+        path: "/dashboard/projects/:id/tasks", element: <RequireAuth><Tasks /></RequireAuth>, action: taskAction, loader: async ({ params }) => {
             const id = params.id
             console.log(id)
+
             const currentState = store.getState().tasks
             const userTasks = currentState.filter(t => t.project_id == id)
             if (userTasks && userTasks.length > 0) {
@@ -77,7 +69,8 @@ const router = createBrowserRouter([
             store.dispatch(addTasks(data?.body))
             return data
         }
-    }
+    },
+    { path: "*", element: <div className="d-flex flex-column align-items-center pt-5"><h1 className="text-white bg-danger p-5 rounded">PAGE NOT FOUND</h1></div> }
 ])
 
 export { router };

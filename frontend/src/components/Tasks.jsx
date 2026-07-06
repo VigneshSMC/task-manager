@@ -50,6 +50,9 @@ export default function Tasks() {
     const filteredusers = project?.members?.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
     console.log("filtered users", filteredusers)
 
+    const user = useSelector(state => state.user)
+    const access = user.groups.some(u => !['manager', 'admin'].includes(u))
+
     return (
         <div >
             <h1 className="text-center bg-primary py-4 fw-bold mb-4 text-white">TASKS</h1>
@@ -90,7 +93,7 @@ export default function Tasks() {
 
                                 </Card.Body>
                                 <Card.Footer className="border-top-0 bg-transparent text-end">
-                                    <Button variant="outline-danger" onClick={() => {
+                                    <Button disabled={access} variant="outline-danger" onClick={() => {
                                         deleteTaskAPI(d.project_id, d._id)
                                         dispatch(deleteTask(d._id))
                                     }}>&times;</Button>
@@ -100,24 +103,26 @@ export default function Tasks() {
                         )
                     })}
                 </Row>
-                <Modal show={add}>
+                <Modal size="sm" show={add}>
                     <RouterForm method="post">
                         <Modal.Header>
                             <Modal.Title className="text-primary">NEW TASK</Modal.Title>
                         </Modal.Header>
                         <Modal.Body>
                             <Form.Group className="mb-3">
-                                <Form.Label>Title: </Form.Label>
+                                <Form.Label>Title</Form.Label>
                                 <Form.Control name="title" type="text" placeholder="enter title" />
                             </Form.Group>
+                            <hr />
                             <Form.Group className="mb-3">
                                 <Form.Label>
-                                    Description:
+                                    Description
                                 </Form.Label>
                                 <Form.Control name="description" type="text" placeholder="enter description" />
                             </Form.Group>
-                            <Button className="d-inline-flex mb-2" onClick={() => { setAssignUser(prev => !prev) }}>ASSIGN USER </Button>
-                            {selectedUser && <div><h6 className="d-inline-flex">Assigned to:</h6>
+                            <hr />
+                            <Button size="sm" className="d-inline-flex mb-3" onClick={() => { setAssignUser(prev => !prev) }}>ASSIGN USER </Button>
+                            {selectedUser && <div><p className="d-inline-flex">Assigned to:</p>
                                 <span className="d-inline ms-2">{selectedUser?.name}</span>
                                 <input type="hidden" name="assignee" value={selectedUser?._id} /></div>}
                             {assignUser && (<Card>
@@ -132,8 +137,9 @@ export default function Tasks() {
                                     })}
                                 </ListGroup>
                             </Card>)}
+                            <hr />
                             <fieldset className="mb-3">
-                                <legend>Priority</legend>
+                                <p className="mb-0">Priority</p>
                                 <div className="d-flex gap-2">
                                     <label htmlFor="low">Low</label>
                                     <input defaultChecked value="low" id="low" name="priority" type="radio" />
@@ -143,7 +149,7 @@ export default function Tasks() {
                                     <input value="high" id="high" name="priority" type="radio" />
                                 </div>
                             </fieldset>
-                            <select name="status">
+                            <select className="border border-1 p-2 rounded" name="status">
                                 <option value="to do">TO DO</option>
                                 <option value="in progress">IN PROGRESS</option>
                                 <option value="under review">UNDER REVIEW</option>
@@ -156,7 +162,7 @@ export default function Tasks() {
                         </Modal.Footer>
                     </RouterForm>
                 </Modal>
-                <Modal show={edit.proceed}>
+                <Modal size="sm" show={edit.proceed}>
                     <RouterForm method="post" key={edit.task ? edit.task._id : ''}>
                         <input type="hidden" name="taskId" value={edit.task ? edit.task._id : ''} />
                         <Modal.Header>
@@ -164,15 +170,17 @@ export default function Tasks() {
                         </Modal.Header>
                         <Modal.Body>
                             <Form.Group className="mb-3">
-                                <Form.Label><h5>Title</h5></Form.Label>
+                                <Form.Label>Title</Form.Label>
                                 <Form.Control defaultValue={edit.task ? edit.task.title : ''} name="title" type="text" placeholder="enter title" />
                             </Form.Group>
+                            <hr />
                             <Form.Group className="mb-3">
-                                <Form.Label><h5>Description</h5></Form.Label>
+                                <Form.Label>Description</Form.Label>
                                 <Form.Control defaultValue={edit.task ? edit.task.description : ''} name="description" type="text" placeholder="enter description" />
                             </Form.Group>
-                            <Button className="d-inline-flex mb-2" onClick={() => { setAssignUser(prev => !prev) }}>UPDATE USER</Button>
-                            {selectedUser && <div><h6 className="d-inline-flex">Assigned to:</h6>
+                            <hr />
+                            <Button size="sm" className="d-inline-flex mb-1" onClick={() => { setAssignUser(prev => !prev) }}>UPDATE USER</Button>
+                            {selectedUser && <div><p className="d-inline-flex">Assigned to:</p>
                                 <span className="d-inline ms-2">{selectedUser?.name}</span>
                                 <input type="hidden" name="assignee" value={selectedUser?._id} /></div>}
                             <input type="hidden" name="assignee" value={selectedUser?._id} />
@@ -188,8 +196,9 @@ export default function Tasks() {
                                     })}
                                 </ListGroup>
                             </Card>)}
+                            <hr />
                             <fieldset className="mb-3">
-                                <legend>Priority</legend>
+                                <p className="m-0">Priority</p>
                                 <div className="d-flex gap-2">
                                     <label htmlFor="low">Low</label>
                                     <input defaultChecked value="low" id="low" name="priority" type="radio" />
@@ -199,7 +208,7 @@ export default function Tasks() {
                                     <input value="high" id="high" name="priority" type="radio" />
                                 </div>
                             </fieldset>
-                            <select defaultValue={edit.task ? edit.task.status : ''} name="status">
+                            <select className="border border-1 p-2 rounded" defaultValue={edit.task ? edit.task.status : ''} name="status">
                                 <option value="to do">TO DO</option>
                                 <option value="in progress">IN PROGRESS</option>
                                 <option value="under review">UNDER REVIEW</option>
@@ -242,39 +251,4 @@ export default function Tasks() {
             </Container >
         </div>
     )
-}
-
-export const taskAction = async ({ request, params }) => {
-    const { id } = params
-    const formData = await request.formData()
-    const intent = formData.get('intent')
-    const cleanedData = Object.fromEntries(formData)
-    console.log("cleaned data", cleanedData)
-    try {
-        if (intent === 'create') {
-            const ret = await addTaskAPI(id, cleanedData)
-            console.log("return", ret.data)
-            console.log("test", ret.data.task)
-            if (ret) store.dispatch(addTask(ret.data.task))
-            return {
-                success: true
-            }
-        }
-
-        if (intent === 'update') {
-            const taskId = formData.get("taskId");
-            const ret = await updateTaskAPI(id, taskId, cleanedData);
-            console.log("return", ret.data.data)
-            if (ret) store.dispatch(updateTask(ret.data.data));
-            return { success: true };
-        }
-
-        return { success: false, message: "Invalid action intent." };
-    }
-    catch (error) {
-        return {
-            success: false,
-            message: error.message
-        }
-    }
 }

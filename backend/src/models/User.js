@@ -9,11 +9,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'please provide an email id'],
         unique: true
-    },
-    role: {
-        type: String,
-        enum: ["user", "admin", "manager"],
-        default: "user"
     }
 },{
     timestamps: true

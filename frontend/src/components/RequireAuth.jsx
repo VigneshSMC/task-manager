@@ -1,9 +1,11 @@
 import { fetchAuthSession, signInWithRedirect } from "aws-amplify/auth";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function RequireAuth({ children }) {
     const [loading, setLoading] = useState(true);
     const [authenticated, setAuthenticated] = useState(false);
+    const navigate = useNavigate()
 
     useEffect(() => {
         async function check() {
@@ -11,12 +13,18 @@ export default function RequireAuth({ children }) {
                 const session = await fetchAuthSession();
                 console.log('session', session)
 
-                if (session.tokens?.idToken) {
+                if (session.tokens?.accessToken) {
                     setAuthenticated(true);
+                    setLoading(false)
                 } else {
-                    await signInWithRedirect();
+                    setLoading(false)
+                    navigate("/", { replace: true })
                 }
-            } finally {
+            }
+            catch (e) {
+                navigate("/", { replace: true })
+            }
+            finally {
                 setLoading(false);
             }
         }

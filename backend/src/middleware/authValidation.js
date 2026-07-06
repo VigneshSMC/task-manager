@@ -51,7 +51,10 @@ const cognitoAuth = async (req, res, next) => {
 
         const payload = await verifier.verify(token);
 
+        const { "cognito:groups": groups} = payload
+
         req.user = payload;
+        req.user.roles = groups
 
         next();
 

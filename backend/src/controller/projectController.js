@@ -58,10 +58,10 @@ exports.deleteProject = async (req, res) => {
         const id = req.params.id
         const project = await Project.findByIdAndDelete(id)
         if (!project) return res.status(404).json({message: "project not found"})
-        res.status(200).json({message: "deletion successful", data: project})
+        return res.status(200).json({message: "deletion successful", data: project})
     }
     catch(error) {
-        res.status(400).json({error: error.message})
+        return res.status(400).json({error: error.message})
     }
 }
 

@@ -1,10 +1,21 @@
 import { signOut } from "aws-amplify/auth"
 import { useState } from "react"
 import { Card, Container } from "react-bootstrap"
-import { Outlet, NavLink } from "react-router-dom"
+import { Outlet, NavLink, useNavigate, useNavigation } from "react-router-dom"
 
 const Dashboard = () => {
+
+    const navigate = useNavigate()
+    const navigation = useNavigation()
+
+    const isSubmitting = navigation.state === 'submitting'
+
     const [showLogout, setShowLogout] = useState(false)
+
+    const userSignOut = () => {
+        signOut()
+        navigate("/login")
+    }
 
     return (
         <main>
@@ -21,7 +32,9 @@ const Dashboard = () => {
                             className="p-3 position-absolute end-0 top-100 mt-2 shadow" 
                             style={{ minWidth: '120px' }}
                         >
-                            <button onClick={() => signOut()} className="btn btn-sm btn-danger w-100">Log out</button>
+                            <button onClick={() => userSignOut()} className="btn btn-sm btn-danger w-100">Log out
+                                <span className="spinner"></span>
+                            </button>
                         </Card>
                     )}
                     

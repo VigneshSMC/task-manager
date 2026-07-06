@@ -8,6 +8,7 @@ import { store } from '../store/store'
 import { useNavigate } from "react-router-dom"
 import { getAllUsers } from "../services/userService"
 import { Button, Card, Col, Container, Form, ListGroup, Modal, Row, Alert } from "react-bootstrap"
+import { getCurrentUser } from "aws-amplify/auth"
 
 const Projects = () => {
 
@@ -62,18 +63,23 @@ const Projects = () => {
         setSelectedUsers(selectedUsers.filter(d => d._id !== s._id))
     }
 
+    const user = useSelector(state => state.user)
+    console.log("inside project", user)
+
+    const access = user.groups.some(u => !['manager', 'admin'].includes(u))
+
     return (
         <Container className="container py-4">
             <div className="d-flex align-items-center justify-content-between mb-4">
-                <h2>PROJECTS</h2>
-                <Button className="addbutton" onClick={() => handleAdd()}>+</Button></div>
+                <h3 className="border p-2 rounded bg-primary text-white">PROJECTS</h3>
+                <Button disabled={access} className="addbutton" onClick={() => handleAdd()}>+</Button></div>
             <Row xs={2} md={3} lg={5} className="g-4 mb-4">
                 {data.map(d => {
                     return (<Col key={d._id}>
                         <Card>
                             <Card.Header className="bg-primary pt-3 text-white d-flex justify-content-between align-items-start">
                                 <Card.Title style={{ cursor: 'pointer' }} onClick={() => projectRedirect(d._id)}>{d.name}</Card.Title>
-                                <Button variant="link" className="p-0 text-dark" onClick={() => handleUpdate(d)}>&#9998;</Button>
+                                <Button disabled={access} variant="link" className="p-0 text-dark" onClick={() => handleUpdate(d)}>&#9998;</Button>
                             </Card.Header>
                             <Card.Body className="edit">
                                 <Card.Text>{d.description}</Card.Text>
@@ -87,7 +93,7 @@ const Projects = () => {
                                 </ListGroup>
                             </Card.Body>
                             <Card.Footer className="bg-transparent border-top-0 text-end">
-                                <Button variant="outline-danger" size="sm" onClick={() => {
+                                <Button disabled={access} variant="outline-danger" size="sm" onClick={() => {
                                     deleteProjectAPI(d._id)
                                     dispatch(deleteProject(d._id))
                                 }} >
@@ -99,7 +105,7 @@ const Projects = () => {
                     )
                 })}
             </Row>
-            <Modal show={add.proceed}>
+            <Modal size="sm" show={add.proceed}>
                 <RouterForm method="post" onClick={() => setError(false)}>
                     <Modal.Header>
                         <Modal.Title>NEW PROJECT</Modal.Title>
@@ -119,7 +125,7 @@ const Projects = () => {
                             <h6>Selected Members:</h6>
                             {selectedUsers.map(n => <span key={n._id} className="d-inline-flex align-items-center me-2 bg-light px-3 py-1 gap-3 border rounded">
                                 <span>{n.name}</span><span style={{cursor: 'pointer'}} onClick={() => removeSelectedMembers(n)}>&times;</span></span>)}</div>
-                        <Suspense fallback={<div>Loading users...</div>}>
+                        <Suspense>
                             <Await resolve={add.users}>
                                 {resolved => (
                                     seeMembers &&
@@ -151,10 +157,10 @@ const Projects = () => {
             {error && actionData?.message &&
                 <div className="error"><p>{actionData.message}</p></div>}
 
-            <Modal show={update.proceed} onHide={() => setUpdate({proceed: false})}>
+            <Modal size="sm" show={update.proceed} onHide={() => setUpdate({proceed: false})}>
                 <RouterForm className="update" method="post" onClick={() => setError(false)}>
                     <Modal.Header>
-                        UPDATE PROJECT
+                        <Modal.Title>UPDATE PROJECT</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         {selectedUsers.map(s => <input key={s._id} type="hidden" name="members" value={s._id} />)}
@@ -171,8 +177,8 @@ const Projects = () => {
                         <Button onClick={() => setSeeMembers(true)}>Add Members</Button>
                         <div className="my-2">
                             <h6>Selected Members: </h6>
-                            {selectedUsers.map(n => <span className="d-inline-flex align-items-center me-2 bg-light px-3 py-1 gap-3 border rounded">
-                                <span key={n._id}>{n.name}</span><span style={{cursor: 'pointer'}} onClick={() => removeSelectedMembers(n)}>&times;</span></span>)}
+                            {selectedUsers.map(n => <span key={n._id} className="d-inline-flex align-items-center me-2 bg-light px-3 py-1 gap-3 border rounded">
+                                <span>{n.name}</span><span style={{cursor: 'pointer'}} onClick={() => removeSelectedMembers(n)}>&times;</span></span>)}
                         </div>
                         <Suspense>
                             <Await resolve={update.users}>
@@ -198,41 +204,6 @@ const Projects = () => {
             </Modal>
         </Container>
     )
-}
-
-export const addProjectData = async ({ request }) => {
-
-    try {
-
-        const formData = await request.formData()
-        const intent = formData.get('intent')
-        if (formData.get('name') == '' || formData.get('description') == '') {
-            return { message: "name/description cannot be empty" }
-        }
-        const cleanedData = Object.fromEntries(formData)
-        cleanedData.members = formData.getAll('members')
-        console.log("cleanedData - members", cleanedData)
-
-        if (intent == 'create') {
-            const ret = await addProjectAPI(cleanedData)
-            console.log("returned value - ", ret.data.project)
-            if (ret) store.dispatch(addProject(ret.data.project))
-            console.log("start")
-            console.log("end")
-            return { success: true }
-        }
-        else if (intent == 'update') {
-            const id = formData.get('id')
-            const ret = await updateProjectAPI(id, cleanedData)
-            console.log("Inside projects - ", ret)
-            console.log("update return", ret.data.data)
-            if (ret) store.dispatch(updateProject(ret.data.data))
-            return { success: true }
-        }
-    }
-    catch (error) {
-        return { success: false }
-    }
 }
 
 export default Projects;
