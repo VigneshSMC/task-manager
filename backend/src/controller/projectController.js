@@ -25,10 +25,12 @@ exports.getProject = async (req, res) => {
 }
 exports.addProject = async (req, res) => {
     try {
-        const { name, description, members } = req.body
+        const { name, description, members, startDate, endDate } = req.body
         let project = await Project.create({
             name,
             description,
+            startDate,
+            endDate,
             members
         })
         project = await project.populate("members", "name")
@@ -41,9 +43,9 @@ exports.addProject = async (req, res) => {
 exports.updateProject = async (req, res) => {
     try {
         const id = req.params.id
-        const {name, description, members} = req.body
+        const {name, description, members, startDate, endDate} = req.body
         console.log(req.body)
-        let updatedProject = await Project.findByIdAndUpdate(id, {name, description, members}, {new: true, runValidators: true})
+        let updatedProject = await Project.findByIdAndUpdate(id, {name, description, members, startDate, endDate}, {new: true, runValidators: true})
         if (!updatedProject) return res.status(404).json({message: "project id not found"})
         updatedProject = await updatedProject.populate("members", "name")
         res.status(200).json({message: "updated successfully", data: updatedProject})

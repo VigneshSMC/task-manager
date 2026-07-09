@@ -1,6 +1,8 @@
-import { fetchAuthSession, signInWithRedirect } from "aws-amplify/auth";
+import { fetchAuthSession, getCurrentUser, signInWithRedirect } from "aws-amplify/auth";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { store } from "../store/store";
+import { addUser } from "../slice/UserSlice";
 
 export default function RequireAuth({ children }) {
     const [loading, setLoading] = useState(true);
@@ -14,6 +16,14 @@ export default function RequireAuth({ children }) {
                 console.log('session', session)
 
                 if (session.tokens?.accessToken) {
+                    console.log("inside requireAuth")
+                    const user = await getCurrentUser()
+                    console.log("user", user)
+                    const email = user?.signInDetails?.loginId || []
+                    const groups = session?.tokens?.idToken?.payload['cognito:groups'] || []
+                    store.dispatch(addUser({ email, groups }))
+                    console.log("from redux", store.getState().user)
+
                     setAuthenticated(true);
                     setLoading(false)
                 } else {
@@ -22,6 +32,7 @@ export default function RequireAuth({ children }) {
                 }
             }
             catch (e) {
+                console.log(e)
                 navigate("/", { replace: true })
             }
             finally {

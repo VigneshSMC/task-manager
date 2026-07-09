@@ -30,14 +30,7 @@ const router = createBrowserRouter([
         path: "/dashboard", element: <RequireAuth><Dashboard /></RequireAuth>, children: [
             { index: true, element: <Navigate to="projects" /> },
             {
-                path: "projects", element: <Projects />, action: processData, loader: async () => {
-
-                    const user = await getCurrentUser()
-                    const email = user?.signInDetails?.loginId || []
-                    const session = await fetchAuthSession()
-                    const groups = session?.tokens?.idToken?.payload['cognito:groups'] || []
-                    store.dispatch(addUser({email, groups}))
-                    console.log("from redux", store.getState().user)
+                path: "projects", element: <RequireAuth><Projects /></RequireAuth>, action: processData, loader: async () => {
 
                     const allProjects = store.getState().projects
                     console.log(allProjects)

@@ -16,7 +16,7 @@ export default function RootPage() {
 
     return (
         <Container className="d-flex flex-row justify-content-center align-items-center gap-2" style={{marginTop: '8rem'}}>
-                <h1 className="py-3 px-4 me-5 rounded bg-primary text-white">SMART TASK MANAGER</h1>
+                <h1 className="py-3 px-4 me-2 display-3 text-primary">SMART TASK MANAGER</h1>
                 <div className="d-flex flex-column justify-content-center align-items-center">
                     <Outlet />
                 </div>

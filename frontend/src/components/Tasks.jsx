@@ -12,6 +12,8 @@ import { getProjectAPI } from "../services/projectService"
 export default function Tasks() {
 
     const tasks = useSelector(state => state.tasks)
+    const projects = useSelector(state => state.projects)
+
     console.log("tasks", tasks)
     const navigate = useNavigate()
     const dispatch = useDispatch()
@@ -28,8 +30,11 @@ export default function Tasks() {
     const [assignUser, setAssignUser] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
     const [selectedUser, setSelectedUser] = useState('')
+    const [validation, setValidation] = useState()
 
     useEffect(() => {
+        setValidation({ ...actionData })
+        console.log("validation", validation)
         if (actionData?.success) {
             setAdd(false)
             setEdit({ proceed: false, task: null })
@@ -51,58 +56,70 @@ export default function Tasks() {
     console.log("filtered users", filteredusers)
 
     const user = useSelector(state => state.user)
-    const access = user.groups.some(u => !['manager', 'admin'].includes(u))
+    const access = user?.groups?.some(u => !['manager', 'admin'].includes(u))
+
+    const current = projects.find(p => p._id == params.id)
+    console.log("current project", current)
 
     return (
         <div >
-            <h1 className="text-center bg-primary py-4 fw-bold mb-4 text-white">TASKS</h1>
+            <div className="d-flex bg-primary rounded m-2 mb-4 align-items-center justify-content-between">
+                <div className="d-flex align-items-center">
+                    <Button className="border-2 bg-white text-primary 
+                    rounded-5 ms-2 d-flex align-items-center justify-content-center"
+                        style={{ width: "30px", height: "30px" }} onClick={() => navigate(-1)}>&larr;</Button>
+                    <h1 className="bg-primary fs-5 ps-1 m-2 rounded fw-semibold text-white">TASKS</h1>
+                </div>
+                <h1 className="fs-5 pe-4 text-white m-0">{current.name}</h1>
+            </div>
             <Container >
                 <div className="d-flex justify-content-between mb-3">
-                    <Button className="border-2 rounded-5 me-auto" style={{ width: "40px", height: "40px" }} onClick={() => navigate(-1)}>&larr;</Button>
                     <Button className="ms-auto" onClick={() => { loadMembers(); setAdd(true); setSelectedUser('') }}>+</Button>
                     <Button className="ms-2" onClick={() => { loadMembers(); setMember(true); }}>members</Button>
                 </div>
-                <Row xs={2} md={3} lg={4} className="g-4 mt-5">
-                    {tasks.map((d, i) => {
-                        return (<Col key={i}>
-                            <Card>
-                                <Card.Header className="d-flex justify-content-between align-items-center w-100 pb-1 bg-primary">
-                                    <Card.Title className="text-white">{d.title}</Card.Title>
-                                    <Button variant="link text-black" style={{ cursor: 'pointer' }} className="" onClick={() => { loadMembers(); update(d); setSelectedUser(d?.assignee) }}>&#9998;</Button>
-                                </Card.Header>
-                                <Card.Body className="m-0">
-                                    <Card.Text>{d.description}</Card.Text>
-                                    <div className="d-flex align-items-center justify-content-between gap-2 mb-2">
-                                        <span className="small text-secondary fw-semibold">Priority:</span>
-                                        <Badge bg={d.priority === 'high' ? 'danger' : d.priority === 'medium' ? 'warning' : 'secondary'} size="sm">
-                                            {d.priority}
-                                        </Badge>
-                                    </div>
+                {tasks.length == 0 ? <h2 className="text-center text-primary mt-5">NO TASKS AVAILABLE</h2> :
+                    <Row xs={2} md={3} lg={5} className="g-2 mt-4 border border-1 rounded p-5">
+                        {tasks.map((d, i) => {
+                            return (<Col key={i}>
+                                <Card>
+                                    <Card.Header className="d-flex justify-content-between align-items-center w-100 pb-1 bg-primary">
+                                        <Card.Title className="text-white">{d.title}</Card.Title>
+                                        <Button variant="link text-black" style={{ cursor: 'pointer' }} className="" onClick={() => { loadMembers(); update(d); setSelectedUser(d?.assignee) }}>&#9998;</Button>
+                                    </Card.Header>
+                                    <Card.Body className="p-3 pb-0">
+                                        <Card.Text>{d.description}</Card.Text>
+                                        <div className="d-flex align-items-center justify-content-between gap-2 mb-2">
+                                            <span className="small text-secondary fw-semibold">Priority:</span>
+                                            <Badge bg={d.priority === 'high' ? 'danger' : d.priority === 'medium' ? 'warning' : 'secondary'} size="sm">
+                                                {d.priority}
+                                            </Badge>
+                                        </div>
 
-                                    <div className="d-flex align-items-center justify-content-between gap-2 mb-2">
-                                        <span className="small text-secondary fw-semibold">Status:</span>
-                                        <Badge bg={d.status === 'done' ? 'success' : d.status === 'in progress' ? 'info' : d.status === 'under review' ? 'info' : 'dark'} className="text-capitalize">
-                                            {d.status}
-                                        </Badge>
-                                    </div>
+                                        <div className="d-flex align-items-center justify-content-between gap-2 mb-2">
+                                            <span className="small text-secondary fw-semibold">Status:</span>
+                                            <Badge bg={d.status === 'done' ? 'success' : d.status === 'in progress' ? 'info' : d.status === 'under review' ? 'info' : 'dark'} className="text-capitalize">
+                                                {d.status}
+                                            </Badge>
+                                        </div>
 
-                                    <div className="border-top pt-2 mt-2 d-flex align-items-center justify-content-between small text-muted">
-                                        <span className="fw-semibold">Assigned To:</span>
-                                        <span className="text-dark fw-medium">{d.assignee ? d.assignee?.name : 'NONE'}</span>
-                                    </div>
+                                        <div className="border-top pt-2 mt-2 d-flex align-items-center justify-content-between small text-muted">
+                                            <span className="fw-semibold">Assigned To:</span>
+                                            <span className="text-dark fw-medium">{d.assignee ? d.assignee?.name : 'NONE'}</span>
+                                        </div>
 
-                                </Card.Body>
-                                <Card.Footer className="border-top-0 bg-transparent text-end">
-                                    <Button disabled={access} variant="outline-danger" onClick={() => {
-                                        deleteTaskAPI(d.project_id, d._id)
-                                        dispatch(deleteTask(d._id))
-                                    }}>&times;</Button>
-                                </Card.Footer>
-                            </Card>
-                        </Col>
-                        )
-                    })}
-                </Row>
+                                    </Card.Body>
+                                    <Card.Footer className="border-top-0 bg-transparent text-end p-0 m-3 ms-0">
+                                        <Button disabled={access} variant="outline-danger" onClick={() => {
+                                            deleteTaskAPI(d.project_id, d._id)
+                                            dispatch(deleteTask(d._id))
+                                        }}>&times;</Button>
+                                    </Card.Footer>
+                                </Card>
+                            </Col>
+                            )
+                        })}
+                    </Row>
+                }
                 <Modal size="sm" show={add}>
                     <RouterForm method="post">
                         <Modal.Header>
@@ -111,14 +128,16 @@ export default function Tasks() {
                         <Modal.Body>
                             <Form.Group className="mb-3">
                                 <Form.Label>Title</Form.Label>
-                                <Form.Control name="title" type="text" placeholder="enter title" />
+                                <Form.Control onFocus={() => setValidation(prev => ({ ...prev, title: '' }))} name="title" type="text" placeholder="enter title" />
+                                {validation?.title && <h6 className="fs-6 text-danger">{validation?.title}</h6>}
                             </Form.Group>
                             <hr />
                             <Form.Group className="mb-3">
                                 <Form.Label>
                                     Description
                                 </Form.Label>
-                                <Form.Control name="description" type="text" placeholder="enter description" />
+                                <Form.Control onFocus={() => setValidation(prev => ({ ...prev, description: '' }))} name="description" type="text" placeholder="enter description" />
+                                {validation?.description && <h6 className="fs-6 text-danger">{validation?.description}</h6>}
                             </Form.Group>
                             <hr />
                             <Button size="sm" className="d-inline-flex mb-3" onClick={() => { setAssignUser(prev => !prev) }}>ASSIGN USER </Button>
@@ -157,7 +176,7 @@ export default function Tasks() {
                             </select>
                         </Modal.Body>
                         <Modal.Footer>
-                            <Button variant="secondary" onClick={() => { setAdd(false); setAssignUser(false) }}>Close</Button>
+                            <Button variant="secondary" onClick={() => { setAdd(false); setAssignUser(false); setValidation() }}>Close</Button>
                             <Button name="intent" value="create" type="submit">ADD</Button>
                         </Modal.Footer>
                     </RouterForm>
@@ -171,12 +190,14 @@ export default function Tasks() {
                         <Modal.Body>
                             <Form.Group className="mb-3">
                                 <Form.Label>Title</Form.Label>
-                                <Form.Control defaultValue={edit.task ? edit.task.title : ''} name="title" type="text" placeholder="enter title" />
+                                <Form.Control onFocus={() => setValidation(prev => ({ ...prev, title: '' }))} defaultValue={edit.task ? edit.task.title : ''} name="title" type="text" placeholder="enter title" />
+                                {validation?.title && <h6 className="fs-6 text-danger">{validation?.title}</h6>}
                             </Form.Group>
                             <hr />
                             <Form.Group className="mb-3">
                                 <Form.Label>Description</Form.Label>
-                                <Form.Control defaultValue={edit.task ? edit.task.description : ''} name="description" type="text" placeholder="enter description" />
+                                <Form.Control onFocus={() => setValidation(prev => ({ ...prev, description: '' }))} defaultValue={edit.task ? edit.task.description : ''} name="description" type="text" placeholder="enter description" />
+                                {validation?.description && <h6 className="fs-6 text-danger">{validation?.description}</h6>}
                             </Form.Group>
                             <hr />
                             <Button size="sm" className="d-inline-flex mb-1" onClick={() => { setAssignUser(prev => !prev) }}>UPDATE USER</Button>
@@ -189,13 +210,23 @@ export default function Tasks() {
                                 <ListGroup style={{ overflowY: 'auto', maxHeight: '150px', cursor: 'pointer' }}>
                                     {filteredusers?.map(u => {
                                         return (
-                                            <ListGroup.Item onClick={() => { setAssignUser(false); setSelectedUser(u) }} key={u._id}>
+                                            <ListGroup.Item onClick={() => { setAssignUser(false); setSelectedUser(u); }} key={u._id}>
                                                 {u.name}
                                             </ListGroup.Item>
                                         )
                                     })}
                                 </ListGroup>
                             </Card>)}
+                            <hr />
+                            <Form.Group onFocus={() => setValidation(prev => ({ ...prev, date: '' }))} className="mb-2">
+                                <Form.Label className="m-0">Start Date</Form.Label>
+                                <Form.Control name="startDate" type="date"></Form.Control>
+                            </Form.Group>
+                            <Form.Group onFocus={() => setValidation(prev => ({ ...prev, date: '' }))}>
+                                <Form.Label className="m-0">End Date</Form.Label>
+                                <Form.Control name="endDate" type="date"></Form.Control>
+                            </Form.Group>
+                            {validation?.date && <h6 className="fs-6 text-danger">{validation?.date}</h6>}
                             <hr />
                             <fieldset className="mb-3">
                                 <p className="m-0">Priority</p>
@@ -216,7 +247,7 @@ export default function Tasks() {
                             </select>
                         </Modal.Body>
                         <Modal.Footer>
-                            <Button variant="secondary" onClick={() => { setAssignUser(false); setEdit({ proceed: false }) }}>Close</Button>
+                            <Button variant="secondary" onClick={() => { setAssignUser(false); setEdit({ proceed: false }); setValidation() }}>Close</Button>
                             <Button name="intent" value="update" type="submit">UPDATE</Button>
                         </Modal.Footer>
                     </RouterForm>

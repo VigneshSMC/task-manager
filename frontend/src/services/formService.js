@@ -1,4 +1,4 @@
-import { confirmSignUp, signIn, signUp } from "aws-amplify/auth"
+import { confirmSignUp, fetchAuthSession, signIn, signUp } from "aws-amplify/auth"
 import { addTask, updateTask } from "../slice/TaskSlice"
 import { addTaskAPI, updateTaskAPI } from "./taskService"
 import { redirect, replace } from "react-router-dom"
@@ -13,9 +13,18 @@ const processData = async ({ request }) => {
 
         const formData = await request.formData()
         const intent = formData.get('intent')
-        if (formData.get('name') == '' || formData.get('description') == '') {
-            return { message: "name/description cannot be empty" }
-        }
+        const error = {}
+
+        const name = formData.get('name')?.toString().trim()
+        const description = formData.get('description').toString().trim()
+        const startDate = formData.get('startDate')
+        const endDate = formData.get('endDate')
+
+        if (!name) error.name = "project name cannot be empty"
+        if (!description) error.description = "description cannot be empty"
+
+        if (Object.keys(error).length > 0) return error
+
         const cleanedData = Object.fromEntries(formData)
         cleanedData.members = formData.getAll('members')
         console.log("cleanedData - members", cleanedData)
@@ -45,6 +54,25 @@ const processData = async ({ request }) => {
 const taskAction = async ({ request, params }) => {
     const { id } = params
     const formData = await request.formData()
+
+    const error = {}
+
+    const title = formData.get('title')?.toString().trim();
+    const description = formData.get('description')?.toString().trim();
+    const startDate = formData.get('startDate')
+    const endDate = formData.get('endDate')
+
+    if (!title) {
+        error.title = "title cannot be empty"
+    }
+    if (!description) {
+        error.description = "description cannot be empty"
+    }
+    if (startDate > endDate) error.date = "start date cannot be greater than end date"
+
+
+    if (Object.keys(error).length > 0) return error
+
     const intent = formData.get('intent')
     const cleanedData = Object.fromEntries(formData)
     console.log("cleaned data", cleanedData)
@@ -81,6 +109,9 @@ const registerAction = async ({ request }) => {
     try {
         const formData = await request.formData()
         const { name, email, password, gender, intent, otp } = Object.fromEntries(formData)
+        if (name === '') return { error: "name is required" }
+        if (email === '') return { error: "email is required" }
+        if (password === '') return { error: "password not entered" }
 
         console.log(email)
 
@@ -126,8 +157,13 @@ const registerAction = async ({ request }) => {
 const loginAction = async ({ request }) => {
     try {
 
+        const user = await fetchAuthSession()
+        if (user?.tokens?.accessToken) return redirect("/dashboard")
+
         const formData = await request.formData()
         const { intent, email, password, otp } = Object.fromEntries(formData)
+        if (email === '') return { error: "email is required" }
+        if (password === '') return { error: "password is required" }
         console.log(intent, email, password)
 
         if (intent === 'otp') {
@@ -150,7 +186,7 @@ const loginAction = async ({ request }) => {
             console.log(result)
             if (!result?.isSignedIn && result?.nextStep?.signInStep !== 'DONE') return { otp: true }
             else {
-                const response = await verifyUser({email, password})
+                const response = await verifyUser({ email, password })
                 console.log("response", response)
             }
 
