@@ -1,0 +1,109 @@
+on:
+
+ push:
+   branches:
+     - main
+
+ pull_request:
+   branches:
+     - main
+
+jobs:
+
+ frontend-build:
+
+   runs-on: ubuntu-latest
+
+   defaults:
+     run:
+       working-directory: frontend
+
+   steps:
+
+     - name: Checkout Code
+       uses: actions/checkout@v4
+
+     - name: Setup Node
+       uses: actions/setup-node@v4
+       with:
+         node-version: 22
+
+     - name: Install Dependencies
+       run: npm install
+
+     - name: Build React App
+       run: npm run build
+
+     - name: Configure AWS
+       uses: aws-actions/configure-aws-credentials@v4
+       with:
+         aws-access-key-id:
+           ${{ secrets.AWS_ACCESS_KEY_ID }}
+
+         aws-secret-access-key:
+           ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+         aws-region:
+           ${{ secrets.AWS_REGION }}
+
+     - name: Deploy Frontend
+       run: |
+
+         aws s3 sync \
+         build/ \
+         s3://${{ secrets.S3_BUCKET_NAME }} \
+         --delete
+
+ backend-build:
+
+   runs-on: ubuntu-latest
+
+   defaults:
+     run:
+       working-directory: backend
+
+   steps:
+
+     - name: Checkout Code
+       uses: actions/checkout@v4
+
+     - name: Configure AWS
+       uses: aws-actions/configure-aws-credentials@v4
+       with:
+
+         aws-access-key-id:
+           ${{ secrets.AWS_ACCESS_KEY_ID }}
+
+         aws-secret-access-key:
+           ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+         aws-region:
+           ${{ secrets.AWS_REGION }}
+
+     - name: Login ECR
+       id: login-ecr
+
+       uses:
+         aws-actions/amazon-ecr-login@v2
+
+     - name: Build Image
+
+       run: |
+
+         docker build \
+         -t smart-task-backend .
+
+     - name: Tag Image
+
+       run: |
+
+         docker tag \
+         smart-task-backend:latest \
+         ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:latest
+
+     - name: Push Image
+
+       run: |
+
+         docker push \
+         ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:latest
